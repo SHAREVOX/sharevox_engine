@@ -779,7 +779,7 @@ def generate_app(
         metas: List[Speakers]
             モデルのメタ情報
             metas.jsonをlistにしたもの
-        speaker_infos: List[SpeakerInfo]
+        speaker_infos: SpeakerInfo
             speakerの情報
         """
         try:
