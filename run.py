@@ -779,8 +779,8 @@ def generate_app(
         metas: List[Speakers]
             モデルのメタ情報
             metas.jsonをlistにしたもの
-        speaker_infos: SpeakerInfo
-            speakerの情報
+        speaker_infos: Dict[str, SpeakerInfo]
+            keyをspeakerInfoのUUIDとした複数のspeaker情報
         """
         try:
             register_sv_model(sv_model)

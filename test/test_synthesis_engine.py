@@ -17,7 +17,6 @@ from voicevox_engine.synthesis_engine.synthesis_engine import (
     pre_process,
     split_mora,
     to_flatten_moras,
-    to_phoneme_data_list,
     unvoiced_mora_phoneme_list,
 )
 
@@ -218,10 +217,6 @@ class TestSynthesisEngine(TestCase):
             + self.accent_phrases_hello_hiho[1].moras,
         )
 
-    def test_to_phoneme_data_list(self):
-        phoneme_data_list = to_phoneme_data_list(self.str_list_hello_hiho)
-        self.assertEqual(phoneme_data_list, self.phoneme_data_list_hello_hiho)
-
     def test_split_mora(self):
         consonant_phoneme_list, vowel_phoneme_list, vowel_indexes = split_mora(
             self.phoneme_data_list_hello_hiho
@@ -264,7 +259,8 @@ class TestSynthesisEngine(TestCase):
         )
 
     def test_pre_process(self):
-        flatten_moras, phoneme_data_list = pre_process(
+        # 第3引数のaccent_id_listは利用しないのでスルー
+        flatten_moras, phoneme_data_list, _ = pre_process(
             deepcopy(self.accent_phrases_hello_hiho)
         )
 

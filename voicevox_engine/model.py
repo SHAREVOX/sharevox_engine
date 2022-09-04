@@ -294,4 +294,4 @@ class SVModelInfo(BaseModel):
     embedder_model: str = Field("embedder_model.onnxをbase64エンコードした文字列")
     decoder_model: str = Field("decoder_model.onnxをbase64エンコードした文字列")
     metas: List[Speaker] = Field("metas.jsonをlistにしたモデルのメタ情報")
-    speaker_info: SpeakerInfo = Field("speakerの情報")
+    speaker_infos: Dict[str, SpeakerInfo] = Field("keyをspeakerInfoのUUIDとした複数のspeaker情報")
