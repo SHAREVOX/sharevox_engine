@@ -33,7 +33,7 @@ class TestSVModel(TestCase):
             shutil.rmtree("./test/model")
         if os.path.exists("./test/speaker_info"):
             shutil.rmtree("./test/speaker_info")
-        
+
         # ready default librareis.json
         os.makedirs("./test/model")
         with open("./test/model/libraries.json", "w") as f:
@@ -114,8 +114,7 @@ class TestSVModel(TestCase):
         self.assertListEqual(mismatch, [])
         self.assertListEqual(errors, [])
 
-        with open("./test/model/libraries.json", 'r') as f:
+        with open("./test/model/libraries.json", "r") as f:
             libraries = json.load(f)
             self.assertIn("official", libraries.keys())
             self.assertIn(sv_model_uuid, libraries.keys())
-            

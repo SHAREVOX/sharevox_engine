@@ -289,6 +289,7 @@ class SVModelInfo(BaseModel):
     """
     SVモデルの情報
     """
+
     uuid: str = Field(title="モデル固有のUUID")
     variance_model: str = Field(title="variance_model.onnxをbase64エンコードした文字列")
     embedder_model: str = Field("embedder_model.onnxをbase64エンコードした文字列")

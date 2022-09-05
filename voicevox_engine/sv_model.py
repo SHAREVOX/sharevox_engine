@@ -5,10 +5,11 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from appdirs import user_data_dir
 from voicevox_engine.model import SVModelInfo
 
-user_dir = Path(user_data_dir("sharevox-engine"))
+# テストでstored_dirを切り替えたいのでmodel_dirは利用しない
+from voicevox_engine.utility.copy_model_and_info import user_dir
+
 
 def get_all_sv_models(stored_dir: Path = user_dir) -> List[str]:
     """
@@ -29,9 +30,9 @@ def get_all_sv_models(stored_dir: Path = user_dir) -> List[str]:
 
 
 def register_sv_model(
-        sv_model: SVModelInfo,
-        stored_dir: Path = user_dir,
-    ):
+    sv_model: SVModelInfo,
+    stored_dir: Path = user_dir,
+):
     """
     送られた単一のSVModelを保存する。返り値はない。
     """
@@ -94,11 +95,13 @@ def register_sv_model(
                 for idx, voice_sample in enumerate(style_info.voice_samples):
                     # 既存の採番は1-indexedなので
                     with open(
-                        speaker_info_dir / "voice_samples" / f"{style_info.id}_00{idx+1}.wav",
+                        speaker_info_dir
+                        / "voice_samples"
+                        / f"{style_info.id}_00{idx+1}.wav",
                         "wb",
                     ) as f:
                         f.write(base64.b64decode(voice_sample.encode("utf-8")))
-        
+
         # 最後にlibraries.jsonに追記する
         # 2回ロックをかけるよりも1回のrwロックの方が整合性が保たれて良い
         with open(stored_dir / "model" / "libraries.json", "r+") as f:
