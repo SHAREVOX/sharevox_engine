@@ -1,4 +1,5 @@
 import filecmp
+import json
 import os
 import shutil
 from pathlib import Path
@@ -16,12 +17,12 @@ from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 
 class TestSVModel(TestCase):
     def test_get_all_sv_models(self):
-        libraries_dir = Path("test")
-        sv_models = get_all_sv_models(libraries_dir=libraries_dir)
+        stored_dir = Path("test") / "testdata"
+        sv_models = get_all_sv_models(stored_dir=stored_dir)
         self.assertListEqual(
             sv_models,
             [
-                "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
+                "official",
                 "35b2c544-660e-401e-b503-0e14c635303a",
             ],
         )
@@ -32,11 +33,17 @@ class TestSVModel(TestCase):
             shutil.rmtree("./test/model")
         if os.path.exists("./test/speaker_info"):
             shutil.rmtree("./test/speaker_info")
+        
+        # ready default librareis.json
+        os.makedirs("./test/model")
+        with open("./test/model/libraries.json", "w") as f:
+            json.dump({"official": True}, f)
 
         # ready dummy data
+        sv_model_uuid = "b351e601-3e98-40d4-ac1d-19529d932c22"
         speaker_uuid = "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff"
         sv_model = SVModelInfo(
-            uuid=speaker_uuid,
+            uuid=sv_model_uuid,
             variance_model="dmFyaWFuY2VfbW9kZWw=",  # variance_model
             embedder_model="ZW1iZWRkZXJfbW9kZWw=",  # embedder_model
             decoder_model="ZGVjb2Rlcl9tb2RlbA==",  # decoder_model
@@ -80,8 +87,8 @@ class TestSVModel(TestCase):
             "decoder_model.onnx",
         ]
         match, mismatch, errors = filecmp.cmpfiles(
-            f"./test/model/{sv_model.uuid}",
-            "./test/test_model",
+            f"./test/model/{sv_model_uuid}",
+            f"./test/testdata/model/{sv_model_uuid}",
             expected_same_files,
         )
         self.assertListEqual(match, expected_same_files)
@@ -90,19 +97,25 @@ class TestSVModel(TestCase):
 
         # check if only the file size is more than 0,
         # because it's めんどい
-        self.assertTrue(os.path.getsize(f"./test/model/{sv_model.uuid}/metas.json") > 0)
+        self.assertTrue(os.path.getsize(f"./test/model/{sv_model_uuid}/metas.json") > 0)
 
         expected_same_files = [
             "policy.md",
             "portrait.png",
-            # "icons/0.png",
+            "icons/0.png",
             "voice_samples/0_001.wav",
         ]
         match, mismatch, errors = filecmp.cmpfiles(
             f"./test/speaker_info/{speaker_uuid}",
-            "./test/test_speaker_info",
+            f"./test/testdata/speaker_info/{speaker_uuid}",
             expected_same_files,
         )
         self.assertListEqual(match, expected_same_files)
         self.assertListEqual(mismatch, [])
         self.assertListEqual(errors, [])
+
+        with open("./test/model/libraries.json", 'r') as f:
+            libraries = json.load(f)
+            self.assertIn("official", libraries.keys())
+            self.assertIn(sv_model_uuid, libraries.keys())
+            
