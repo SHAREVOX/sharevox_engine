@@ -313,8 +313,8 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # pitchesを取得していない場合のみ、推論を行う
         if pitches is None:
-            # Phoneme IDのリスト(phoneme_id_list)とAccent IDのリスト(accent_id_list)を
-            # variance_forwarderにかけ、推論器によって適切な音素ごとの音高・音素長を割り当てる
+            # Phoneme IDのリスト(phoneme_id_list)とAccent IDのリスト(accent_id_list)をvariance_forwarderにかけ、
+            # 推論器によって適切な音素ごとの音高・音素長を割り当てる
             with self.mutex:
                 pitches, _ = self.core.variance_forward(
                     length=len(phoneme_id_list),

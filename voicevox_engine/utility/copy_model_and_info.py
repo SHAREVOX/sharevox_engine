@@ -1,8 +1,8 @@
-import glob
-import json
 import os
-import shutil
 from pathlib import Path
+import shutil
+import json
+import glob
 from typing import Dict
 
 from appdirs import user_data_dir
