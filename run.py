@@ -38,6 +38,7 @@ from voicevox_engine.model import (
     Speaker,
     SpeakerInfo,
     SupportedDevicesInfo,
+    SVModelInfo,
     UserDictWord,
     WordTypes,
 )
@@ -47,6 +48,7 @@ from voicevox_engine.morphing import (
 )
 from voicevox_engine.part_of_speech_data import MAX_PRIORITY, MIN_PRIORITY
 from voicevox_engine.preset import Preset, PresetLoader
+from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engines
 from voicevox_engine.user_dict import (
     apply_word,
@@ -128,7 +130,7 @@ def generate_app(
         tags=["クエリ作成"],
         summary="音声合成用のクエリを作成する",
     )
-    def audio_query(text: str, speaker: str, core_version: Optional[str] = None):
+    def audio_query(text: str, speaker: int, core_version: Optional[str] = None):
         """
         クエリの初期値を得ます。ここで得られたクエリはそのまま音声合成に利用できます。各値の意味は`Schemas`を参照してください。
         """
@@ -200,7 +202,7 @@ def generate_app(
     )
     def accent_phrases(
         text: str,
-        speaker: str,
+        speaker: int,
         is_kana: bool = False,
         core_version: Optional[str] = None,
     ):
@@ -238,7 +240,7 @@ def generate_app(
     )
     def mora_data(
         accent_phrases: List[AccentPhrase],
-        speaker: str,
+        speaker: int,
         core_version: Optional[str] = None,
     ):
         engine = get_engine(core_version)
@@ -252,7 +254,7 @@ def generate_app(
     )
     def mora_length(
         accent_phrases: List[AccentPhrase],
-        speaker: str,
+        speaker: int,
         core_version: Optional[str] = None,
     ):
         engine = get_engine(core_version)
@@ -268,7 +270,7 @@ def generate_app(
     )
     def mora_pitch(
         accent_phrases: List[AccentPhrase],
-        speaker: str,
+        speaker: int,
         core_version: Optional[str] = None,
     ):
         engine = get_engine(core_version)
@@ -291,7 +293,7 @@ def generate_app(
     )
     def synthesis(
         query: AudioQuery,
-        speaker: str,
+        speaker: int,
         enable_interrogative_upspeak: bool = Query(  # noqa: B008
             default=True,
             description="疑問系のテキストが与えられたら語尾を自動調整する",
@@ -327,7 +329,7 @@ def generate_app(
     )
     def cancellable_synthesis(
         query: AudioQuery,
-        speaker: str,
+        speaker: int,
         request: Request,
         core_version: Optional[str] = None,
     ):
@@ -364,7 +366,7 @@ def generate_app(
     )
     def multi_synthesis(
         queries: List[AudioQuery],
-        speaker: str,
+        speaker: int,
         core_version: Optional[str] = None,
     ):
         engine = get_engine(core_version)
@@ -410,8 +412,8 @@ def generate_app(
     )
     def _synthesis_morphing(
         query: AudioQuery,
-        base_speaker: str,
-        target_speaker: str,
+        base_speaker: int,
+        target_speaker: int,
         morph_rate: float = Query(..., ge=0.0, le=1.0),  # noqa: B008
         core_version: Optional[str] = None,
     ):
@@ -604,7 +606,7 @@ def generate_app(
         return ret_data
 
     @app.post("/initialize_speaker", status_code=204, tags=["その他"])
-    def initialize_speaker(speaker: str, core_version: Optional[str] = None):
+    def initialize_speaker(speaker: int, core_version: Optional[str] = None):
         """
         指定されたspeaker_idの話者を初期化します。
         実行しなくても他のAPIは使用できますが、初回実行時に時間がかかることがあります。
@@ -614,7 +616,7 @@ def generate_app(
         return Response(status_code=204)
 
     @app.get("/is_initialized_speaker", response_model=bool, tags=["その他"])
-    def is_initialized_speaker(speaker: str, core_version: Optional[str] = None):
+    def is_initialized_speaker(speaker: int, core_version: Optional[str] = None):
         """
         指定されたspeaker_idの話者が初期化されているかどうかを返します。
         """
@@ -781,6 +783,50 @@ def generate_app(
     @app.get("/engine_manifest", response_model=EngineManifest, tags=["その他"])
     def engine_manifest():
         return engine_manifest_loader.load_manifest()
+
+    @app.get("/sv_models", response_model=List[str], tags=["SVModel"])
+    def get_sv_models():
+        try:
+            sv_models_list = get_all_sv_models()
+        except Exception:
+            traceback.print_exc()
+            # 読み出しができないのはサーバ側の問題なのでInternal Server Errorにする
+            raise HTTPException(status_code=500, detail="SVモデルの取得に失敗しました。")
+        return Response(
+            content=json.dumps(sv_models_list),
+            media_type="application/json",
+        )
+
+    @app.post("/sv_model", tags=["SVModel"])
+    def post_sv_model(sv_model: SVModelInfo):
+        """
+        svモデルを登録します。
+
+        Parameters
+        ----------
+        uuid: str
+            モデル固有のUUID
+        variance_model: str
+            variance_model.onnxをbase64エンコードした文字列
+        embedder_model: str
+            embedder_model.onnxをbase64エンコードした文字列
+        decoder_model: str
+            decoder_model.onnxをbase64エンコードした文字列
+        metas: List[Speakers]
+            モデルのメタ情報
+            metas.jsonをlistにしたもの
+        speaker_infos: Dict[str, SpeakerInfo]
+            keyをspeakerInfoのUUIDとした複数のspeaker情報
+        """
+        try:
+            register_sv_model(sv_model)
+        except FileExistsError:
+            traceback.print_exc()
+            raise HTTPException(status_code=409, detail="モデルのUUIDが衝突しました。")
+        except Exception:
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
+        return Response(status_code=204)
 
     return app
 
