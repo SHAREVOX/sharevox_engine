@@ -365,6 +365,24 @@ jobs:
           rm -rf download/${{ env.VOICEVOX_CORE_ASSET_NAME }}
           rm download/${{ env.VOICEVOX_CORE_ASSET_NAME }}.zip
 
+      # Download SHAREVOX Model
+      - name: Prepare SHAREVOX Model cache
+        uses: actions/cache@v2
+        id: sharevox-model-cache
+        with:
+          key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
+          path: download/model
+
+      - name: Download SHAREVOX Model
+        if: steps.sharevox-model-cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          SHAREVOX_MODEL_ASSET_NAME: sharevox_model-${{ env.VOICEVOX_CORE_VERSION }}
+        run: |
+          curl -L "https://github.com/SHAREVOX/sharevox_core/releases/download/${{ env.VOICEVOX_CORE_VERSION }}/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip" > download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
+          7z x -o"download" download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
+          rm download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
+
       - name: Generate licenses.json
         shell: bash
         run: |
@@ -400,6 +418,7 @@ jobs:
 
           LIBCORE_PATH="$LIBCORE_PATH" \
           LIBONNXRUNTIME_PATH="$LIBONNXRUNTIME_PATH" \
+          MODEL_DIR_PATH="download/model" \
           pyinstaller --noconfirm run.spec        
 
       - name: Show disk space (debug info)
