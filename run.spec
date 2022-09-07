@@ -76,6 +76,13 @@ if libonnxruntime_path:
     filename = os.path.basename(libonnxruntime_path)
     datas += [(filename, libonnxruntime_path, 'DATA')]
 
+model_dir_path = os.environ.get('MODEL_DIR_PATH')
+if model_dir_path:
+    print('MODEL_DIR_PATH is found:', model_dir_path)
+    if not os.path.isdir(model_dir_path):
+        raise Exception("model_dir_path was found, but it is not directory!")
+    datas += [("model", model_dir_path, 'DATA')]
+
 coll = COLLECT(
     exe,
     [],
