@@ -292,7 +292,7 @@ class SVModelInfo(BaseModel):
 
     uuid: str = Field(title="モデル固有のUUID")
     variance_model: str = Field(title="variance_model.onnxをbase64エンコードした文字列")
-    embedder_model: str = Field("embedder_model.onnxをbase64エンコードした文字列")
-    decoder_model: str = Field("decoder_model.onnxをbase64エンコードした文字列")
-    metas: List[Speaker] = Field("metas.jsonをlistにしたモデルのメタ情報")
-    speaker_infos: Dict[str, SpeakerInfo] = Field("keyをspeakerInfoのUUIDとした複数のspeaker情報")
+    embedder_model: str = Field(title="embedder_model.onnxをbase64エンコードした文字列")
+    decoder_model: str = Field(title="decoder_model.onnxをbase64エンコードした文字列")
+    metas: List[Speaker] = Field(title="metas.jsonをlistにしたモデルのメタ情報")
+    speaker_infos: Dict[str, SpeakerInfo] = Field(title="keyをspeakerInfoのUUIDとした複数のspeaker情報")
