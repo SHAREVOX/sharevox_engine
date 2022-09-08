@@ -144,6 +144,15 @@ class SpeakerInfo(BaseModel):
     style_infos: List[StyleInfo] = Field(title="スタイルの追加情報")
 
 
+class ModelConfig(BaseModel):
+    """
+    model_config.jsonをdictにした機械学習に利用するための情報
+    """
+
+    length_regulator: str = Field(title="利用するregulatorの文字列。normalもしくはgaussian")
+    start_id: int = Field(title="model番号のoffset")
+
+
 class DownloadableLibrary(BaseModel):
     """
     ダウンロード可能な音声ライブラリの情報（最新情報をwebで取得することを考慮して、ローカルの情報はない）
@@ -306,4 +315,5 @@ class SVModelInfo(BaseModel):
     embedder_model: str = Field(title="embedder_model.onnxをbase64エンコードした文字列")
     decoder_model: str = Field(title="decoder_model.onnxをbase64エンコードした文字列")
     metas: List[Speaker] = Field(title="metas.jsonをlistにしたモデルのメタ情報")
+    model_config: ModelConfig = Field(title="model_config.jsonをdictにした機械学習に利用するための情報")
     speaker_infos: Dict[str, SpeakerInfo] = Field(title="keyをspeakerInfoのUUIDとした複数のspeaker情報")
