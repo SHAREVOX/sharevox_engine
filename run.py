@@ -797,7 +797,7 @@ def generate_app(
             media_type="application/json",
         )
 
-    @app.post("/sv_model", tags=["SVModel"])
+    @app.post("/sv_model", status_code=204, tags=["SVModel"])
     def post_sv_model(sv_model: SVModelInfo):
         """
         svモデルを登録します。
