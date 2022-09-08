@@ -16,6 +16,10 @@
 コアは [SHAREVOX CORE](https://github.com/SHAREVOX/sharevox_core/) 、
 全体構成は [こちら](https://github.com/SHAREVOX/sharevox/blob/main/docs/%E5%85%A8%E4%BD%93%E6%A7%8B%E6%88%90.md) に詳細があります。）
 
+## ダウンロード
+
+[こちら](https://github.com/SHAREVOX/sharevox_engine/releases/latest)から対応するエンジンをダウンロードしてください。
+
 ## API ドキュメント
 
 [API ドキュメント](https://sharevox.github.io/sharevox_engine/api/)をご参照ください。
@@ -262,6 +266,11 @@ curl -s -X GET "localhost:50025/speaker_info?speaker_uuid=7ffcb7ce-00ec-4bdc-82c
 (`/synthesis`では通信を切断しても最後まで音声合成の計算が行われます)  
 この API は実験的機能であり、エンジン起動時に引数で`--enable_cancellable_synthesis`を指定しないと有効化されません。  
 音声合成に必要なパラメータは`/synthesis`と同様です。
+
+## アップデート
+
+エンジンディレクトリ内にあるファイルを全て消去し、新しいものに置き換えてください。
+
 <!--
 ## Docker イメージ
 

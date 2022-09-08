@@ -849,19 +849,19 @@ if __name__ == "__main__":
         type=Path,
         default=None,
         action="append",
-        help="VOICEVOX COREのディレクトリパスです。",
+        help="SHAREVOX COREのディレクトリパスです。",
     )
     parser.add_argument(
         "--runtime_dir",
         type=Path,
         default=None,
         action="append",
-        help="VOICEVOX COREで使用するライブラリのディレクトリパスです。",
+        help="SHAREVOX COREで使用するライブラリのディレクトリパスです。",
     )
     parser.add_argument(
         "--enable_mock",
         action="store_true",
-        help="指定するとVOICEVOX COREを使わずモックで音声合成を行います。",
+        help="指定するとSHAREVOX COREを使わずモックで音声合成を行います。",
     )
     parser.add_argument(
         "--enable_cancellable_synthesis",
@@ -875,13 +875,13 @@ if __name__ == "__main__":
 
     # 引数へcpu_num_threadsの指定がなければ、環境変数をロールします。
     # 環境変数にもない場合は、Noneのままとします。
-    # VV_CPU_NUM_THREADSが空文字列でなく数値でもない場合、エラー終了します。
+    # SV_CPU_NUM_THREADSが空文字列でなく数値でもない場合、エラー終了します。
     parser.add_argument(
         "--cpu_num_threads",
         type=int,
-        default=os.getenv("VV_CPU_NUM_THREADS") or None,
-        help="音声合成を行うスレッド数です。指定しないと、代わりに環境変数VV_CPU_NUM_THREADSの値が使われます。"
-        "VV_CPU_NUM_THREADSに値がなかった、または数値でなかった場合はエラー終了します。",
+        default=os.getenv("SV_CPU_NUM_THREADS") or None,
+        help="音声合成を行うスレッド数です。指定しないと、代わりに環境変数SV_CPU_NUM_THREADSの値が使われます。"
+        "SV_CPU_NUM_THREADSに値がなかった、または数値でなかった場合はエラー終了します。",
     )
 
     args = parser.parse_args()
