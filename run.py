@@ -15,6 +15,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryFile
 from typing import Dict, List, Optional
 
+import requests
 import soundfile
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -31,6 +32,7 @@ from voicevox_engine.kana_parser import create_kana, parse_kana
 from voicevox_engine.model import (
     AccentPhrase,
     AudioQuery,
+    DownloadableLibrary,
     ParseKanaBadRequest,
     ParseKanaError,
     Speaker,
@@ -567,6 +569,40 @@ def generate_app(
         ret_data = {"policy": policy, "portrait": portrait, "style_infos": style_infos}
         return ret_data
 
+    @app.get(
+        "/downloadable_libraries",
+        response_model=List[DownloadableLibrary],
+        tags=["その他"],
+    )
+    def downloadable_libraries():
+        """
+        ダウンロード可能なモデル情報を返します。
+
+        Returns
+        -------
+        ret_data: List[DownloadableLibrary]
+        """
+        try:
+            manifest = engine_manifest_loader.load_manifest()
+            # APIからダウンロード可能な音声ライブラリを取得する場合
+            if manifest.downloadable_libraries_url:
+                response = requests.get(manifest.downloadable_libraries_url, timeout=60)
+                ret_data: List[DownloadableLibrary] = [
+                    DownloadableLibrary(**d) for d in response.json()
+                ]
+            # ローカルのファイルからダウンロード可能な音声ライブラリを取得する場合
+            elif manifest.downloadable_libraries_path:
+                with open(manifest.downloadable_libraries_path) as f:
+                    ret_data: List[DownloadableLibrary] = [
+                        DownloadableLibrary(**d) for d in json.load(f)
+                    ]
+            else:
+                raise Exception
+        except Exception:
+            traceback.print_exc()
+            raise HTTPException(status_code=422, detail="ダウンロード可能な音声ライブラリの取得に失敗しました。")
+        return ret_data
+
     @app.post("/initialize_speaker", status_code=204, tags=["その他"])
     def initialize_speaker(speaker: int, core_version: Optional[str] = None):
         """
@@ -751,23 +787,55 @@ def generate_app(
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=50025)
-    parser.add_argument("--use_gpu", action="store_true")
-    parser.add_argument("--sharevox_dir", type=Path, default=None)
-    parser.add_argument("--voicelib_dir", type=Path, default=None, action="append")
-    parser.add_argument("--runtime_dir", type=Path, default=None, action="append")
-    parser.add_argument("--enable_mock", action="store_true")
-    parser.add_argument("--enable_cancellable_synthesis", action="store_true")
+    parser = argparse.ArgumentParser(description="SHAREVOX のエンジンです。")
+    parser.add_argument(
+        "--host", type=str, default="127.0.0.1", help="接続を受け付けるホストアドレスです。"
+    )
+    parser.add_argument("--port", type=int, default=50025, help="接続を受け付けるポート番号です。")
+    parser.add_argument(
+        "--use_gpu", action="store_true", help="指定するとGPUを使って音声合成するようになります。"
+    )
+    parser.add_argument(
+        "--sharevox_dir", type=Path, default=None, help="SHAREVOXのディレクトリパスです。"
+    )
+    parser.add_argument(
+        "--voicelib_dir",
+        type=Path,
+        default=None,
+        action="append",
+        help="SHAREVOX COREのディレクトリパスです。",
+    )
+    parser.add_argument(
+        "--runtime_dir",
+        type=Path,
+        default=None,
+        action="append",
+        help="SHAREVOX COREで使用するライブラリのディレクトリパスです。",
+    )
+    parser.add_argument(
+        "--enable_mock",
+        action="store_true",
+        help="指定するとSHAREVOX COREを使わずモックで音声合成を行います。",
+    )
+    parser.add_argument(
+        "--enable_cancellable_synthesis",
+        action="store_true",
+        help="指定すると音声合成を途中でキャンセルできるようになります。",
+    )
     parser.add_argument("--init_processes", type=int, default=2)
-    parser.add_argument("--load_all_models", action="store_true")
+    parser.add_argument(
+        "--load_all_models", action="store_true", help="指定すると起動時に全ての音声合成モデルを読み込みます。"
+    )
 
     # 引数へcpu_num_threadsの指定がなければ、環境変数をロールします。
     # 環境変数にもない場合は、Noneのままとします。
-    # VV_CPU_NUM_THREADSが空文字列でなく数値でもない場合、エラー終了します。
+    # SV_CPU_NUM_THREADSが空文字列でなく数値でもない場合、エラー終了します。
     parser.add_argument(
-        "--cpu_num_threads", type=int, default=os.getenv("VV_CPU_NUM_THREADS") or None
+        "--cpu_num_threads",
+        type=int,
+        default=os.getenv("SV_CPU_NUM_THREADS") or None,
+        help="音声合成を行うスレッド数です。指定しないと、代わりに環境変数SV_CPU_NUM_THREADSの値が使われます。"
+        "SV_CPU_NUM_THREADSに値がなかった、または数値でなかった場合はエラー終了します。",
     )
 
     args = parser.parse_args()
