@@ -38,6 +38,7 @@ from voicevox_engine.model import (
     Speaker,
     SpeakerInfo,
     SupportedDevicesInfo,
+    SVModelInfo,
     UserDictWord,
     WordTypes,
 )
@@ -47,6 +48,7 @@ from voicevox_engine.morphing import (
 )
 from voicevox_engine.part_of_speech_data import MAX_PRIORITY, MIN_PRIORITY
 from voicevox_engine.preset import Preset, PresetLoader
+from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engines
 from voicevox_engine.user_dict import (
     apply_word,
@@ -781,6 +783,50 @@ def generate_app(
     @app.get("/engine_manifest", response_model=EngineManifest, tags=["その他"])
     def engine_manifest():
         return engine_manifest_loader.load_manifest()
+
+    @app.get("/sv_models", response_model=List[str], tags=["SVModel"])
+    def get_sv_models():
+        try:
+            sv_models_list = get_all_sv_models()
+        except Exception:
+            traceback.print_exc()
+            # 読み出しができないのはサーバ側の問題なのでInternal Server Errorにする
+            raise HTTPException(status_code=500, detail="SVモデルの取得に失敗しました。")
+        return Response(
+            content=json.dumps(sv_models_list),
+            media_type="application/json",
+        )
+
+    @app.post("/sv_model", tags=["SVModel"])
+    def post_sv_model(sv_model: SVModelInfo):
+        """
+        svモデルを登録します。
+
+        Parameters
+        ----------
+        uuid: str
+            モデル固有のUUID
+        variance_model: str
+            variance_model.onnxをbase64エンコードした文字列
+        embedder_model: str
+            embedder_model.onnxをbase64エンコードした文字列
+        decoder_model: str
+            decoder_model.onnxをbase64エンコードした文字列
+        metas: List[Speakers]
+            モデルのメタ情報
+            metas.jsonをlistにしたもの
+        speaker_infos: Dict[str, SpeakerInfo]
+            keyをspeakerInfoのUUIDとした複数のspeaker情報
+        """
+        try:
+            register_sv_model(sv_model)
+        except FileExistsError:
+            traceback.print_exc()
+            raise HTTPException(status_code=409, detail="モデルのUUIDが衝突しました。")
+        except Exception:
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
+        return Response(status_code=204)
 
     return app
 
