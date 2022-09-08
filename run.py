@@ -815,6 +815,8 @@ def generate_app(
         metas: List[Speakers]
             モデルのメタ情報
             metas.jsonをlistにしたもの
+        model_config: ModelConfig
+            model_config.jsonをdictにした機械学習に利用するための情報
         speaker_infos: Dict[str, SpeakerInfo]
             keyをspeakerInfoのUUIDとした複数のspeaker情報
         """

@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest import TestCase
 
 from voicevox_engine.model import (
+    ModelConfig,
     Speaker,
     SpeakerInfo,
     SpeakerStyle,
@@ -60,6 +61,10 @@ class TestSVModel(TestCase):
                     version="0.0.1",
                 ),
             ],
+            model_config=ModelConfig(
+                length_regulator="gaussian",
+                start_id=1,
+            ),
             speaker_infos={
                 speaker_uuid: SpeakerInfo(
                     policy="dummy policy",
@@ -98,6 +103,7 @@ class TestSVModel(TestCase):
         # check if only the file size is more than 0,
         # because it's めんどい
         self.assertTrue(os.path.getsize(f"./test/model/{sv_model_uuid}/metas.json") > 0)
+        self.assertTrue(os.path.getsize(f"./test/model/{sv_model_uuid}/model_config.json") > 0)
 
         expected_same_files = [
             "policy.md",
