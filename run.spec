@@ -51,6 +51,7 @@ exe = EXE(
 
 datas = [
     ('engine_manifest_assets', 'engine_manifest_assets', 'DATA'),
+    ('engine_manifest.json', 'engine_manifest.json', 'DATA'),
     ('speaker_info', 'speaker_info', 'DATA'),
     ('default.csv', 'default.csv', 'DATA'),
     ('licenses.json', 'licenses.json', 'DATA'),
