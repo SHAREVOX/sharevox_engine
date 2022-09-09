@@ -62,7 +62,7 @@ def register_sv_model(
 
         # metasは/model/${uuid}/metas.jsonに保存する
         with open(model_uuid_dir / "metas.json", "w") as f:
-            json.dump([meta.json() for meta in sv_model.metas], f)
+            json.dump([meta.dict() for meta in sv_model.metas], f)
 
         # model_config.jsonは/model/${uuid}/model_config.jsonに保存する
         with open(model_uuid_dir / "model_config.json", "w") as f:
