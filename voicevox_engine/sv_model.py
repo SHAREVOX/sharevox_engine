@@ -114,6 +114,9 @@ def register_sv_model(
             f.seek(0)
             json.dump(libraries, f, ensure_ascii=False)
 
+    # 既にファイルが存在する場合は削除しないようにする
+    except FileExistsError as e:
+        raise e
     except Exception as e:
         # 削除時にエラーが発生しても無視する
         shutil.rmtree(stored_dir / "model" / sv_model.uuid, ignore_errors=True)
