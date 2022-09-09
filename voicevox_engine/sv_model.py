@@ -61,12 +61,12 @@ def register_sv_model(
             f.write(base64.b64decode(sv_model.decoder_model.encode("utf-8")))
 
         # metasは/model/${uuid}/metas.jsonに保存する
-        with open(model_uuid_dir / "metas.json", "w") as f:
-            json.dump([meta.dict() for meta in sv_model.metas], f)
+        with open(model_uuid_dir / "metas.json", "w", encoding="uft-8") as f:
+            json.dump([meta.dict() for meta in sv_model.metas], f, ensure_ascii=False)
 
         # model_config.jsonは/model/${uuid}/model_config.jsonに保存する
-        with open(model_uuid_dir / "model_config.json", "w") as f:
-            json.dump(sv_model.model_config.dict(), f)
+        with open(model_uuid_dir / "model_config.json", "w", encoding="uft-8") as f:
+            json.dump(sv_model.model_config.dict(), f, ensure_ascii=False)
 
         # 異常なUUIDを含んでいないか確認する
         assert len(sv_model.metas) == len(sv_model.speaker_infos)
@@ -80,7 +80,7 @@ def register_sv_model(
             os.makedirs(speaker_info_dir / "voice_samples")
 
             # - policy => /speaker_info/${speaker_uuid}/policy.md
-            with open(speaker_info_dir / "policy.md", "w") as f:
+            with open(speaker_info_dir / "policy.md", "w", encoding="uft-8") as f:
                 f.write(speaker_info.policy)
 
             # - portrait => base64デコードして/speaker_info/${speaker_uuid}/portrait.pngに保存
@@ -108,11 +108,11 @@ def register_sv_model(
 
         # 最後にlibraries.jsonに追記する
         # 2回ロックをかけるよりも1回のrwロックの方が整合性が保たれて良い
-        with open(stored_dir / "model" / "libraries.json", "r+") as f:
+        with open(stored_dir / "model" / "libraries.json", "r+", encoding="uft-8") as f:
             libraries = json.load(f)
             libraries[sv_model.uuid] = True
             f.seek(0)
-            json.dump(libraries, f)
+            json.dump(libraries, f, ensure_ascii=False)
 
     except Exception as e:
         # 削除時にエラーが発生しても無視する
