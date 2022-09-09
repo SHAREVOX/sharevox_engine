@@ -784,7 +784,7 @@ def generate_app(
     def engine_manifest():
         return engine_manifest_loader.load_manifest()
 
-    @app.get("/sv_models", response_model=List[str], tags=["SVModel"])
+    @app.get("/sv_models", response_model=List[str], tags=["モデル登録"])
     def get_sv_models():
         try:
             sv_models_list = get_all_sv_models()
@@ -797,7 +797,7 @@ def generate_app(
             media_type="application/json",
         )
 
-    @app.post("/sv_model", status_code=204, tags=["SVModel"])
+    @app.post("/sv_model", status_code=204, tags=["モデル登録"])
     def post_sv_model(sv_model: SVModelInfo):
         """
         svモデルを登録します。
