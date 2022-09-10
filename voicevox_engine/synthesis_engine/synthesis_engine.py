@@ -139,13 +139,20 @@ def pre_process(
         for mora in flatten_moras
     ]
     phoneme_str_list = list(chain.from_iterable(phoneme_each_mora))
+    # variance forwardがうまく動かないので、前後にpauを追加する
+    phoneme_str_list = ["pau"] + phoneme_str_list + ["pau"]
 
-    phoneme_id_list = numpy.array(to_phoneme_id_list(phoneme_str_list), dtype=numpy.int64)
+    phoneme_id_list = numpy.array(
+        to_phoneme_id_list(phoneme_str_list), dtype=numpy.int64
+    )
 
-    accent_str_list = []
+    accent_str_list = ["#"]
     for accent_phrase in accent_phrases:
         for i, mora in enumerate(accent_phrase.moras):
-            if i + 1 == accent_phrase.accent and len(accent_phrase.moras) != accent_phrase.accent:
+            if (
+                i + 1 == accent_phrase.accent
+                and len(accent_phrase.moras) != accent_phrase.accent
+            ):
                 if mora.consonant is not None:
                     accent_str_list.append("_")
                 accent_str_list.append("]")
@@ -159,6 +166,7 @@ def pre_process(
         if accent_phrase.pause_mora is not None:
             accent_str_list.append("_")
         accent_str_list[-1] = "?" if accent_phrase.is_interrogative else "#"
+    accent_str_list.append("#")
     accent_id_list = numpy.array(to_accent_id_list(accent_str_list), dtype=numpy.int64)
 
     return flatten_moras, phoneme_id_list, accent_id_list
@@ -261,7 +269,6 @@ class SynthesisEngine(SynthesisEngineBase):
         pitches: numpy.ndarray
         durations: numpy.ndarray
         with self.mutex:
-            print(speaker_id)
             pitches, durations = self.core.variance_forward(
                 length=len(phoneme_id_list),
                 phonemes=phoneme_id_list,
@@ -271,7 +278,8 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # variance_forwarderの結果をaccent_phrasesに反映する
         # flatten_moras変数に展開された値を変更することでコード量を削減しつつaccent_phrases内のデータを書き換えている
-        index = 0
+        # 前後にpauを含むため、2番目(indexとしては1)から値を取り始める
+        index = 1
         for mora in flatten_moras:
             if mora.consonant is not None:
                 mora.consonant_length = durations[index]
@@ -284,7 +292,10 @@ class SynthesisEngine(SynthesisEngineBase):
         return accent_phrases, pitches
 
     def replace_mora_pitch(
-        self, accent_phrases: List[AccentPhrase], speaker_id: int, pitches: Optional[numpy.ndarray] = None
+        self,
+        accent_phrases: List[AccentPhrase],
+        speaker_id: int,
+        pitches: Optional[numpy.ndarray] = None,
     ) -> List[AccentPhrase]:
         """
         accent_phrasesの音高(ピッチ)を設定する
@@ -325,7 +336,8 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # variance_forwarderの結果をaccent_phrasesに反映する
         # flatten_moras変数に展開された値を変更することでコード量を削減しつつaccent_phrases内のデータを書き換えている
-        index = 0
+        # 前後にpauを含むため、2番目(indexとしては1)から値を取り始める
+        index = 1
         for mora in flatten_moras:
             if mora.consonant is not None:
                 index += 1
@@ -359,14 +371,18 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # length
         # 音素の長さをリストに展開・結合する。
-        phoneme_length_list = [
-            length
-            for mora in flatten_moras
-            for length in (
-                [mora.consonant_length] if mora.consonant is not None else []
-            )
-            + [mora.vowel_length]
-        ]
+        phoneme_length_list = (
+            [0.0]
+            + [
+                length
+                for mora in flatten_moras
+                for length in (
+                    [mora.consonant_length] if mora.consonant is not None else []
+                )
+                + [mora.vowel_length]
+            ]
+            + [0.0]
+        )
         # floatにキャスト
         durations = numpy.array(phoneme_length_list, dtype=numpy.float32)
 
@@ -375,14 +391,16 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # pitch
         # モーラの音高(ピッチ)を展開・結合し、floatにキャストする
-        f0_list = [
-            pitch
-            for mora in flatten_moras
-            for pitch in (
-                  [mora.pitch] if mora.consonant is not None else []
-              )
-              + [mora.pitch]
-        ]
+        f0_list = (
+            [0.0]
+            + [
+                pitch
+                for mora in flatten_moras
+                for pitch in ([mora.pitch] if mora.consonant is not None else [])
+                + [mora.pitch]
+            ]
+            + [0.0]
+        )
         f0 = numpy.array(f0_list, dtype=numpy.float32)
         # 音高(ピッチ)の調節を適用する(2のPitch Scale乗を掛ける)
         f0 *= 2 ** query.pitchScale
@@ -408,12 +426,6 @@ class SynthesisEngine(SynthesisEngineBase):
 
         # volume: ゲイン適用
         wave *= query.volumeScale
-
-        # add sil
-        if query.prePhonemeLength != 0 or query.postPhonemeLength != 0:
-            pre_pause = numpy.zeros(int(self.default_sampling_rate * query.prePhonemeLength))
-            post_pause = numpy.zeros(int(self.default_sampling_rate * query.postPhonemeLength))
-            wave = numpy.concatenate([pre_pause, wave, post_pause], 0)
 
         # 出力サンプリングレートがデフォルト(decode forwarderによるもの、48kHz)でなければ、それを適用する
         if query.outputSamplingRate != self.default_sampling_rate:
