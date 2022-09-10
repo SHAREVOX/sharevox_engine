@@ -372,7 +372,7 @@ class SynthesisEngine(SynthesisEngineBase):
         # length
         # 音素の長さをリストに展開・結合する。
         phoneme_length_list = (
-            [0.0]
+            [query.prePhonemeLength]
             + [
                 length
                 for mora in flatten_moras
@@ -381,7 +381,7 @@ class SynthesisEngine(SynthesisEngineBase):
                 )
                 + [mora.vowel_length]
             ]
-            + [0.0]
+            + [query.postPhonemeLength]
         )
         # floatにキャスト
         durations = numpy.array(phoneme_length_list, dtype=numpy.float32)
