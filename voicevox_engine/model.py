@@ -316,4 +316,6 @@ class SVModelInfo(BaseModel):
     decoder_model: str = Field(title="decoder_model.onnxをbase64エンコードした文字列")
     metas: List[Speaker] = Field(title="metas.jsonをlistにしたモデルのメタ情報")
     model_config: ModelConfig = Field(title="model_config.jsonをdictにした機械学習に利用するための情報")
-    speaker_infos: Dict[str, SpeakerInfo] = Field(title="keyをspeakerInfoのUUIDとした複数のspeaker情報")
+    speaker_infos: Dict[str, SpeakerInfo] = Field(
+        title="keyをspeakerInfoのUUIDとした複数のspeaker情報"
+    )

@@ -103,7 +103,9 @@ class TestSVModel(TestCase):
         # check if only the file size is more than 0,
         # because it's めんどい
         self.assertTrue(os.path.getsize(f"./test/model/{sv_model_uuid}/metas.json") > 0)
-        self.assertTrue(os.path.getsize(f"./test/model/{sv_model_uuid}/model_config.json") > 0)
+        self.assertTrue(
+            os.path.getsize(f"./test/model/{sv_model_uuid}/model_config.json") > 0
+        )
 
         expected_same_files = [
             "policy.md",

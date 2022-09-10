@@ -136,7 +136,10 @@ class SynthesisEngineBase(metaclass=ABCMeta):
 
     @abstractmethod
     def replace_mora_pitch(
-        self, accent_phrases: List[AccentPhrase], speaker_id: int, pitches: Optional[numpy.ndarray]
+        self,
+        accent_phrases: List[AccentPhrase],
+        speaker_id: int,
+        pitches: Optional[numpy.ndarray],
     ) -> List[AccentPhrase]:
         """
         accent_phrasesの音高(ピッチ)を設定する

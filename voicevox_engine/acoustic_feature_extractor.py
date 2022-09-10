@@ -330,13 +330,8 @@ class Accent:
     accent_list : Sequence[str]
         アクセントのリスト
     """
-    accent_list: Sequence[str] = (
-        "[",
-        "]",
-        "#",
-        "?",
-        "_"
-    )
+
+    accent_list: Sequence[str] = ("[", "]", "#", "?", "_")
 
     def __init__(self, accent: str):
         self.accent = accent
