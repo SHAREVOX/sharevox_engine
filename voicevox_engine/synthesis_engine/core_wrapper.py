@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from..utility.copy_model_and_info import model_dir
+from ..utility.copy_model_and_info import model_dir
 
 
 class OldCoreError(Exception):
@@ -385,20 +385,20 @@ class CoreWrapper:
 
         self.default_sampling_rate = 48000
         self.core.variance_forward.argtypes = (
-            c_long,             # length
-            POINTER(c_long),    # phonemes
-            POINTER(c_long),    # accents
-            POINTER(c_long),    # speaker_id
-            POINTER(c_float),   # pitch_output
-            POINTER(c_float),   # duration_output
+            c_long,  # length
+            POINTER(c_long),  # phonemes
+            POINTER(c_long),  # accents
+            POINTER(c_long),  # speaker_id
+            POINTER(c_float),  # pitch_output
+            POINTER(c_float),  # duration_output
         )
         self.core.decode_forward.argtypes = (
-            c_long,             # length
-            POINTER(c_long),    # phonemes
-            POINTER(c_float),   # pitches
-            POINTER(c_float),   # durations
-            POINTER(c_long),    # speaker_id
-            POINTER(c_float),   # output
+            c_long,  # length
+            POINTER(c_long),  # phonemes
+            POINTER(c_float),  # pitches
+            POINTER(c_float),  # durations
+            POINTER(c_long),  # speaker_id
+            POINTER(c_float),  # output
         )
 
         cwd = os.getcwd()
@@ -413,7 +413,12 @@ class CoreWrapper:
             # else:
             #     if not self.core.initialize(".", use_gpu):
             #         raise Exception(self.core.last_error_message().decode("utf-8"))
-            if not self.core.initialize(str(model_dir).encode("utf-8"), use_gpu, cpu_num_threads, load_all_models):
+            if not self.core.initialize(
+                str(model_dir).encode("utf-8"),
+                use_gpu,
+                cpu_num_threads,
+                load_all_models,
+            ):
                 raise Exception(self.core.last_error_message().decode("utf-8"))
         finally:
             os.chdir(cwd)
