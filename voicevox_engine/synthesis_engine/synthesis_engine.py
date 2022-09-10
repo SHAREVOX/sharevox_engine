@@ -269,7 +269,6 @@ class SynthesisEngine(SynthesisEngineBase):
         pitches: numpy.ndarray
         durations: numpy.ndarray
         with self.mutex:
-            print(speaker_id)
             pitches, durations = self.core.variance_forward(
                 length=len(phoneme_id_list),
                 phonemes=phoneme_id_list,
