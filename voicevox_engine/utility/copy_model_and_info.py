@@ -5,9 +5,9 @@ import shutil
 from pathlib import Path
 from typing import Dict
 
-from appdirs import user_data_dir
+from .path_utility import get_save_dir
 
-user_dir = Path(user_data_dir("sharevox-engine"))
+user_dir = get_save_dir()
 model_dir = user_dir / "model"
 libraries_json_path = model_dir / "libraries.json"
 speaker_info_dir = user_dir / "speaker_info"

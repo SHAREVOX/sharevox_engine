@@ -63,7 +63,7 @@ from voicevox_engine.utility import (
     connect_base64_waves,
     copy_model_and_info,
     engine_root,
-    user_dir,
+    get_save_dir,
 )
 
 
@@ -533,6 +533,7 @@ def generate_app(
         else:
             raise HTTPException(status_code=404, detail="該当する話者が見つかりません")
 
+        user_dir = get_save_dir()
         try:
             policy = (user_dir / f"speaker_info/{speaker_uuid}/policy.md").read_text(
                 "utf-8"

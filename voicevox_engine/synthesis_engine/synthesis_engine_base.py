@@ -4,6 +4,8 @@ from typing import List, Optional, Tuple
 
 import numpy
 
+import numpy as np
+
 from .. import full_context_label
 from ..full_context_label import extract_full_context_label
 from ..model import AccentPhrase, AudioQuery, Mora
@@ -217,7 +219,7 @@ class SynthesisEngineBase(metaclass=ABCMeta):
         query: AudioQuery,
         speaker_id: int,
         enable_interrogative_upspeak: bool = True,
-    ) -> str:
+    ) -> np.ndarray:
         """
         音声合成クエリ内の疑問文指定されたMoraを変形した後、
         継承先における実装`_synthesis_impl`を使い音声合成を行う
@@ -243,7 +245,7 @@ class SynthesisEngineBase(metaclass=ABCMeta):
         return self._synthesis_impl(query, speaker_id)
 
     @abstractmethod
-    def _synthesis_impl(self, query: AudioQuery, speaker_id: int):
+    def _synthesis_impl(self, query: AudioQuery, speaker_id: int) -> np.ndarray:
         """
         音声合成クエリから音声合成に必要な情報を構成し、実際に音声合成を行う
         Parameters

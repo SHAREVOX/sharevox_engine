@@ -8,10 +8,10 @@ from typing import List
 from voicevox_engine.model import SVModelInfo
 
 # テストでstored_dirを切り替えたいのでmodel_dirは利用しない
-from voicevox_engine.utility.copy_model_and_info import user_dir
+from voicevox_engine.utility import get_save_dir
 
 
-def get_all_sv_models(stored_dir: Path = user_dir) -> List[str]:
+def get_all_sv_models(stored_dir: Path = get_save_dir()) -> List[str]:
     """
     保存されているsv_modelsの情報をListで返却する。
 
@@ -31,7 +31,7 @@ def get_all_sv_models(stored_dir: Path = user_dir) -> List[str]:
 
 def register_sv_model(
     sv_model: SVModelInfo,
-    stored_dir: Path = user_dir,
+    stored_dir: Path = get_save_dir(),
 ):
     """
     送られた単一のSVModelを保存する。返り値はない。
