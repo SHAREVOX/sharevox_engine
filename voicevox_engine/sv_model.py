@@ -38,18 +38,18 @@ def register_sv_model(
     """
 
     try:
-        # 既存のsv_modelsとUUIDの重複がないかを、ディレクトリ作成時に確認する
+        # 既存のsv_modelsとUUIDの重複があった場合も全て新しく作り直す
         # 以下のディレクトリを作成する
         # - /model/${uuid}
         # - /speaker_info/${uuid}
         # - /speaker_info/${uuid}/icons/
         # - /speaker_info/${uuid}/voice_samples/
-        # FileExistsExceptionが起きたら、ここの階層でもraiseして呼び出し元に流す
         # この後の処理で何らかのExceptionが起きた場合、上記のディレクトリを全て削除する
 
         # 意味的にはmodelsの方が正しそうだけど、実際に保存されたディレクトリ名はmodelだったので
         model_uuid_dir = stored_dir / "model" / sv_model.uuid
-        os.makedirs(model_uuid_dir)
+        if not os.path.exists(model_uuid_dir):
+            os.makedirs(model_uuid_dir)
 
         # variance_model, embedder_model, decoder_modelは
         # それぞれbase64デコードしてから/model/${uuid}/*.onnxに保存する
@@ -76,8 +76,10 @@ def register_sv_model(
         # speaker_infos
         for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
             speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
-            os.makedirs(speaker_info_dir / "icons")
-            os.makedirs(speaker_info_dir / "voice_samples")
+            if not os.path.exists(speaker_info_dir / "icons"):
+                os.makedirs(speaker_info_dir / "icons")
+            if not os.path.exists(speaker_info_dir / "voice_samples"):
+                os.makedirs(speaker_info_dir / "voice_samples")
 
             # - policy => /speaker_info/${speaker_uuid}/policy.md
             with open(speaker_info_dir / "policy.md", "w", encoding="utf-8") as f:
@@ -114,9 +116,6 @@ def register_sv_model(
             f.seek(0)
             json.dump(libraries, f, ensure_ascii=False)
 
-    # 既にファイルが存在する場合は削除しないようにする
-    except FileExistsError as e:
-        raise e
     except Exception as e:
         # 削除時にエラーが発生しても無視する
         shutil.rmtree(stored_dir / "model" / sv_model.uuid, ignore_errors=True)
