@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+from pyexpat import model
 import shutil
 from pathlib import Path
 from typing import List
@@ -48,8 +49,10 @@ def register_sv_model(
 
         # 意味的にはmodelsの方が正しそうだけど、実際に保存されたディレクトリ名はmodelだったので
         model_uuid_dir = stored_dir / "model" / sv_model.uuid
-        if not os.path.exists(model_uuid_dir):
-            os.makedirs(model_uuid_dir)
+        already_exists = os.path.exists(model_uuid_dir)
+        if already_exists:
+            os.rename(model_uuid_dir, model_uuid_dir + ".old")
+        os.makedirs(model_uuid_dir)
 
         # variance_model, embedder_model, decoder_modelは
         # それぞれbase64デコードしてから/model/${uuid}/*.onnxに保存する
@@ -76,10 +79,13 @@ def register_sv_model(
         # speaker_infos
         for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
             speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
-            if not os.path.exists(speaker_info_dir / "icons"):
-                os.makedirs(speaker_info_dir / "icons")
-            if not os.path.exists(speaker_info_dir / "voice_samples"):
-                os.makedirs(speaker_info_dir / "voice_samples")
+            
+            # 既にモデルが存在していた場合はrenameしておく
+            if already_exists:
+                os.rename(speaker_info_dir, speaker_info_dir + ".old")
+
+            os.makedirs(speaker_info_dir / "icons")
+            os.makedirs(speaker_info_dir / "voice_samples")
 
             # - policy => /speaker_info/${speaker_uuid}/policy.md
             with open(speaker_info_dir / "policy.md", "w", encoding="utf-8") as f:
@@ -115,6 +121,13 @@ def register_sv_model(
             libraries[sv_model.uuid] = True
             f.seek(0)
             json.dump(libraries, f, ensure_ascii=False)
+        
+        # backupを削除する
+        if already_exists:
+            shutil.rmtree(model_uuid_dir + ".old")
+            for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+                speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
+                shutil.rmtree(speaker_info_dir + ".old")
 
     except Exception as e:
         # 削除時にエラーが発生しても無視する
@@ -123,4 +136,10 @@ def register_sv_model(
             shutil.rmtree(
                 stored_dir / "speaker_info" / speaker_uuid, ignore_errors=True
             )
+        
+        # backupからrestoreする
+        os.rename(model_uuid_dir + ".old", model_uuid_dir)
+        for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+            speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
+            os.rename(speaker_info_dir + ".old", speaker_info_dir)
         raise e
