@@ -78,7 +78,7 @@ def register_sv_model(
         # speaker_infos
         for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
             speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
-            
+
             # 既にモデルが存在していた場合はrenameしておく
             if already_exists and os.path.exists(speaker_info_dir):
                 os.rename(speaker_info_dir, f"{speaker_info_dir}.old")
@@ -130,6 +130,15 @@ def register_sv_model(
                 if os.path.exists(f"{speaker_info_dir}.old"):
                     shutil.rmtree(f"{speaker_info_dir}.old")
 
+        # backupを削除する
+        if already_exists:
+            shutil.rmtree(f"{model_uuid_dir}.old")
+            for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+                speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
+                # 新しく追加されるspeaker_info_dirに.oldは存在しないはずなので、exists checkをする
+                if os.path.exists(f"{speaker_info_dir}.old"):
+                    shutil.rmtree(f"{speaker_info_dir}.old")
+
     except Exception as e:
         # 削除時にエラーが発生しても無視する
         shutil.rmtree(stored_dir / "model" / sv_model.uuid, ignore_errors=True)
@@ -137,7 +146,7 @@ def register_sv_model(
             shutil.rmtree(
                 stored_dir / "speaker_info" / speaker_uuid, ignore_errors=True
             )
-        
+
         # backupからrestoreする
         os.rename(f"{model_uuid_dir}.old", model_uuid_dir)
         for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
