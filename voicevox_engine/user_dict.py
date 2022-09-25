@@ -13,7 +13,7 @@ from pydantic import conint
 
 from .model import UserDictWord, WordTypes
 from .part_of_speech_data import MAX_PRIORITY, MIN_PRIORITY, part_of_speech_data
-from .utility import engine_root, get_save_dir
+from .utility import delete_file, engine_root, get_save_dir
 
 root_dir = engine_root()
 save_dir = get_save_dir()
@@ -49,6 +49,10 @@ def user_dict_startup_processing(
         str(compiled_dict_path.resolve()),
     )
     pyopenjtalk.set_user_dict(str(compiled_dict_path.resolve(strict=True)))
+    if user_dict_path.is_file():
+        update_dict(
+            default_dict_path=default_dict_path, compiled_dict_path=compiled_dict_path
+        )
 
 
 def update_dict(
@@ -96,6 +100,7 @@ def update_dict(
         str(Path(f.name).resolve(strict=True)),
         str(tmp_dict_path),
     )
+    delete_file(f.name)
     if not tmp_dict_path.is_file():
         raise RuntimeError("辞書のコンパイル時にエラーが発生しました。")
     pyopenjtalk.unset_user_dict()
