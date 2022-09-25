@@ -822,9 +822,6 @@ def generate_app(
         """
         try:
             register_sv_model(sv_model)
-        except FileExistsError:
-            traceback.print_exc()
-            raise HTTPException(status_code=409, detail="モデルのUUIDが衝突しました。")
         except Exception:
             traceback.print_exc()
             raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
