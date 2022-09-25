@@ -50,7 +50,7 @@ def register_sv_model(
         model_uuid_dir = stored_dir / "model" / sv_model.uuid
         already_exists = os.path.exists(model_uuid_dir)
         if already_exists:
-            os.rename(model_uuid_dir, model_uuid_dir + ".old")
+            os.rename(model_uuid_dir, f"{model_uuid_dir}.old")
         os.makedirs(model_uuid_dir)
 
         # variance_model, embedder_model, decoder_modelは
@@ -81,7 +81,7 @@ def register_sv_model(
             
             # 既にモデルが存在していた場合はrenameしておく
             if already_exists:
-                os.rename(speaker_info_dir, speaker_info_dir + ".old")
+                os.rename(speaker_info_dir, f"{speaker_info_dir}.old")
 
             os.makedirs(speaker_info_dir / "icons")
             os.makedirs(speaker_info_dir / "voice_samples")
@@ -123,10 +123,10 @@ def register_sv_model(
         
         # backupを削除する
         if already_exists:
-            shutil.rmtree(model_uuid_dir + ".old")
+            shutil.rmtree(f"{model_uuid_dir}.old")
             for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
                 speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
-                shutil.rmtree(speaker_info_dir + ".old")
+                shutil.rmtree(f"{speaker_info_dir}.old")
 
     except Exception as e:
         # 削除時にエラーが発生しても無視する
@@ -137,8 +137,8 @@ def register_sv_model(
             )
         
         # backupからrestoreする
-        os.rename(model_uuid_dir + ".old", model_uuid_dir)
+        os.rename(f"{model_uuid_dir}.old", model_uuid_dir)
         for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
             speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
-            os.rename(speaker_info_dir + ".old", speaker_info_dir)
+            os.rename(f"{speaker_info_dir}.old", speaker_info_dir)
         raise e
