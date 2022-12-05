@@ -197,7 +197,7 @@ COPY --from=download-core-env /opt/sharevox_core /opt/sharevox_core
 COPY --from=download-onnxruntime-env /opt/onnxruntime /opt/onnxruntime
 
 # Add local files
-ADD ./sharevox_engine /opt/sharevox_engine/sharevox_engine
+ADD ./voicevox_engine /opt/sharevox_engine/voicevox_engine
 ADD ./docs /opt/sharevox_engine/docs
 ADD ./run.py ./generate_licenses.py ./presets.yaml ./default.csv ./engine_manifest.json /opt/sharevox_engine/
 ADD ./speaker_info /opt/sharevox_engine/speaker_info
