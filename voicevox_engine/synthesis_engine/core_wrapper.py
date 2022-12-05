@@ -455,10 +455,8 @@ class CoreWrapper:
         durations: np.ndarray,
         speaker_id: np.ndarray,
     ) -> np.ndarray:
-        wave_size = 0
-        for i in range(length):
-            wave_size += int(round(durations[i] * 93.75))
-        wave_size *= 512
+        int_durations = np.round(durations.astype(np.float32) * 93.75).astype(np.int64)  # 24000 / 256 = 93.75
+        wave_size = int_durations.sum() * 512
         output = np.zeros((wave_size,), dtype=np.float32)
         success = self.core.decode_forward(
             c_long(length),
