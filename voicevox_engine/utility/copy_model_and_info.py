@@ -89,7 +89,6 @@ def copy_model_and_info(root_dir: Path):
                         with open(icon_path, "rb") as f:
                             installed_icon = f.read()
                         copy_flag = root_icon != installed_icon
-                        print("icon", copy_flag)
                     if copy_flag:
                         shutil.copy2(root_icon_path, icon_path)
                 voice_samples = glob.glob(
@@ -112,6 +111,5 @@ def copy_model_and_info(root_dir: Path):
                         with open(voice_sample_path, "rb") as f:
                             installed_voice_sample = f.read()
                         copy_flag = root_voice_sample != installed_voice_sample
-                        print("vs", copy_flag)
                     if copy_flag:
                         shutil.copy2(root_voice_sample_path, voice_sample_path)
