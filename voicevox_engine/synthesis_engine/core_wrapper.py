@@ -457,7 +457,8 @@ class CoreWrapper:
     ) -> np.ndarray:
         wave_size = 0
         for i in range(length):
-            wave_size += int(durations[i] * self.default_sampling_rate)
+            wave_size += int(round(durations[i] * 93.75))
+        wave_size *= 512
         output = np.zeros((wave_size,), dtype=np.float32)
         success = self.core.decode_forward(
             c_long(length),
