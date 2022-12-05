@@ -13,10 +13,10 @@ on:
         required: true
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/voicevox_engine
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/sharevox_engine
   PYTHON_VERSION: "3.8.10"
-  VOICEVOX_RESOURCE_VERSION: "0.13.0"
-  VOICEVOX_CORE_VERSION: "0.13.0"
+  VOICEVOX_RESOURCE_VERSION: "0.1.3"
+  VOICEVOX_CORE_VERSION: "0.1.3"
   VOICEVOX_ENGINE_VERSION:
     |- # releaseタグ名か、workflow_dispatchでのバージョン名か、latestが入る
     ${{ github.event.release.tag_name || github.event.inputs.version || 'latest' }}
@@ -42,44 +42,44 @@ jobs:
             target: runtime-env
             base_image: ubuntu:focal
             base_runtime_image: ubuntu:focal
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-cpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz
           - tag: cpu
             target: runtime-env
             base_image: ubuntu:focal
             base_runtime_image: ubuntu:focal
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-cpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz
           - tag: cpu-ubuntu20.04
             target: runtime-env
             base_image: ubuntu:focal
             base_runtime_image: ubuntu:focal
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-cpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz
           - tag: nvidia
             target: runtime-nvidia-env
             base_image: ubuntu:focal
             base_runtime_image: nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu20.04
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-gpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-gpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-gpu-1.10.0.tgz
           - tag: nvidia-ubuntu20.04
             target: runtime-nvidia-env
             base_image: ubuntu:focal
             base_runtime_image: nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu20.04
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-gpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-gpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-gpu-1.10.0.tgz
           # Ubuntu 18.04
           - tag: cpu-ubuntu18.04
             target: runtime-env
             base_image: ubuntu:bionic
             base_runtime_image: ubuntu:bionic
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-cpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz
           - tag: nvidia-ubuntu18.04
             target: runtime-nvidia-env
             base_image: ubuntu:bionic
             base_runtime_image: nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu18.04
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-gpu
+            voicevox_core_asset_prefix: sharevox_core-linux-x64-gpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-gpu-1.10.0.tgz
 
     steps:
