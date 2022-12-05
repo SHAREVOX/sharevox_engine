@@ -35,7 +35,7 @@ if model_dir_path:
     print('MODEL_DIR_PATH is found:', model_dir_path)
     if not os.path.isdir(model_dir_path):
         raise Exception("model_dir_path was found, but it is not directory!")
-    datas += [("model", model_dir_path, 'DATA')]
+    datas += [(model_dir_path, "model")]
 
 
 block_cipher = None
