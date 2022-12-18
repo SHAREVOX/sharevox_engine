@@ -3,7 +3,6 @@ from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Tuple
 
 import numpy
-
 import numpy as np
 
 from .. import full_context_label

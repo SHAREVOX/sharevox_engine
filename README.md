@@ -296,6 +296,7 @@ Issue 側で取り組み始めたことを伝えるか、最初に Draft プル�
 ## 環境構築
 
 `Python 3.8.10` を用いて開発されています。
+インストールするには、各 OS ごとの C/C++ コンパイラ、CMake が必要になります。
 
 ```bash
 # 開発に必要なライブラリのインストール
@@ -330,6 +331,12 @@ python run.py --sharevox_dir=$SHAREVOX_DIR --voicelib_dir=$VOICELIB_DIR
 ```bash
 # モックでサーバー起動
 python run.py --enable_mock
+```
+
+```bash
+# ログをUTF8に変更
+python run.py --output_log_utf8
+# もしくは VV_OUTPUT_LOG_UTF8=1 python run.py
 ```
 
 ### CPU スレッド数を指定する

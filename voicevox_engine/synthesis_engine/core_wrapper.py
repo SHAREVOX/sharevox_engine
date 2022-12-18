@@ -412,22 +412,39 @@ class CoreWrapper:
         cwd = os.getcwd()
         os.chdir(core_dir)
         try:
-            # if is_version_0_12_core_or_later:
-            #     if not self.core.initialize(use_gpu, cpu_num_threads, load_all_models):
-            #         raise Exception(self.core.last_error_message().decode("utf-8"))
-            # elif exist_cpu_num_threads:
-            #     if not self.core.initialize(".", use_gpu, cpu_num_threads):
-            #         raise Exception(self.core.last_error_message().decode("utf-8"))
-            # else:
-            #     if not self.core.initialize(".", use_gpu):
-            #         raise Exception(self.core.last_error_message().decode("utf-8"))
-            if not self.core.initialize(
-                str(model_dir).encode("utf-8"),
-                use_gpu,
-                cpu_num_threads,
-                load_all_models,
-            ):
-                raise Exception(self.core.last_error_message().decode("utf-8"))
+            if True:
+                if not self.core.initialize(
+                    str(model_dir).encode("utf-8"),
+                    use_gpu,
+                    cpu_num_threads,
+                    load_all_models,
+                ):
+                    raise Exception(
+                        self.core.last_error_message().decode(
+                            "utf-8", "backslashreplace"
+                        )
+                    )
+            elif is_version_0_12_core_or_later:
+                if not self.core.initialize(use_gpu, cpu_num_threads, load_all_models):
+                    raise Exception(
+                        self.core.last_error_message().decode(
+                            "utf-8", "backslashreplace"
+                        )
+                    )
+            elif exist_cpu_num_threads:
+                if not self.core.initialize(".", use_gpu, cpu_num_threads):
+                    raise Exception(
+                        self.core.last_error_message().decode(
+                            "utf-8", "backslashreplace"
+                        )
+                    )
+            else:
+                if not self.core.initialize(".", use_gpu):
+                    raise Exception(
+                        self.core.last_error_message().decode(
+                            "utf-8", "backslashreplace"
+                        )
+                    )
         finally:
             os.chdir(cwd)
 
@@ -452,7 +469,9 @@ class CoreWrapper:
             durations.ctypes.data_as(POINTER(c_float)),
         )
         if not success:
-            raise Exception(self.core.last_error_message().decode("utf-8"))
+            raise Exception(
+                self.core.last_error_message().decode("utf-8", "backslashreplace")
+            )
         return pitches, durations
 
     def decode_forward(
@@ -463,7 +482,9 @@ class CoreWrapper:
         durations: np.ndarray,
         speaker_id: np.ndarray,
     ) -> np.ndarray:
-        int_durations = np.round(durations.astype(np.float32) * 93.75).astype(np.int64)  # 24000 / 256 = 93.75
+        int_durations = np.round(durations.astype(np.float32) * 93.75).astype(
+            np.int64
+        )  # 24000 / 256 = 93.75
         wave_size = int_durations.sum() * 512
         output = np.zeros((wave_size,), dtype=np.float32)
         success = self.core.decode_forward(
@@ -475,7 +496,9 @@ class CoreWrapper:
             output.ctypes.data_as(POINTER(c_float)),
         )
         if not success:
-            raise Exception(self.core.last_error_message().decode("utf-8"))
+            raise Exception(
+                self.core.last_error_message().decode("utf-8", "backslashreplace")
+            )
         return output
 
     def supported_devices(self) -> str:

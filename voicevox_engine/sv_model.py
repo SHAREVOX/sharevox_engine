@@ -120,7 +120,7 @@ def register_sv_model(
             libraries[sv_model.uuid] = True
             f.seek(0)
             json.dump(libraries, f, ensure_ascii=False)
-        
+
         # backupを削除する
         if already_exists:
             shutil.rmtree(f"{model_uuid_dir}.old")
