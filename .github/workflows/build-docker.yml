@@ -107,7 +107,7 @@ jobs:
         if: steps.voicevox-resource-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
         with:
-          repository: VOICEVOX/voicevox_resource
+          repository: SHAREVOX/sharevox_resource
           ref: ${{ env.VOICEVOX_RESOURCE_VERSION }}
           path: download/resource
 
