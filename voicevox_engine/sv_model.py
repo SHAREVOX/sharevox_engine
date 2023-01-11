@@ -10,8 +10,10 @@ from voicevox_engine.model import SVModelInfo
 # テストでstored_dirを切り替えたいのでmodel_dirは利用しない
 from voicevox_engine.utility import get_save_dir
 
+save_dir = get_save_dir()
 
-def get_all_sv_models(stored_dir: Path = get_save_dir()) -> List[str]:
+
+def get_all_sv_models(stored_dir: Path = save_dir) -> List[str]:
     """
     保存されているsv_modelsの情報をListで返却する。
 
@@ -31,7 +33,7 @@ def get_all_sv_models(stored_dir: Path = get_save_dir()) -> List[str]:
 
 def register_sv_model(
     sv_model: SVModelInfo,
-    stored_dir: Path = get_save_dir(),
+    stored_dir: Path = save_dir,
 ):
     """
     送られた単一のSVModelを保存する。返り値はない。
@@ -124,7 +126,7 @@ def register_sv_model(
         # backupを削除する
         if already_exists:
             shutil.rmtree(f"{model_uuid_dir}.old")
-            for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+            for speaker_uuid in sv_model.speaker_infos.keys():
                 speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
                 # 新しく追加されるspeaker_info_dirに.oldは存在しないはずなので、exists checkをする
                 if os.path.exists(f"{speaker_info_dir}.old"):
@@ -133,7 +135,7 @@ def register_sv_model(
         # backupを削除する
         if already_exists:
             shutil.rmtree(f"{model_uuid_dir}.old")
-            for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+            for speaker_uuid in sv_model.speaker_infos.keys():
                 speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
                 # 新しく追加されるspeaker_info_dirに.oldは存在しないはずなので、exists checkをする
                 if os.path.exists(f"{speaker_info_dir}.old"):
@@ -149,7 +151,7 @@ def register_sv_model(
 
         # backupからrestoreする
         os.rename(f"{model_uuid_dir}.old", model_uuid_dir)
-        for speaker_uuid, speaker_info in sv_model.speaker_infos.items():
+        for speaker_uuid in sv_model.speaker_infos.keys():
             speaker_info_dir = stored_dir / "speaker_info" / speaker_uuid
             if os.path.exists(f"{speaker_info_dir}.old"):
                 os.rename(f"{speaker_info_dir}.old", speaker_info_dir)
