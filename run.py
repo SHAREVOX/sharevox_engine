@@ -1109,7 +1109,7 @@ if __name__ == "__main__":
     if args.enable_cancellable_synthesis:
         cancellable_engine = CancellableEngine(args)
 
-    root_dir = args.voicevox_dir if args.voicevox_dir is not None else engine_root()
+    root_dir = args.sharevox_dir if args.sharevox_dir is not None else engine_root()
 
     setting_loader = SettingLoader(args.setting_file)
 
