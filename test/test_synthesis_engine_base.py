@@ -8,65 +8,40 @@ from voicevox_engine.model import AccentPhrase, AudioQuery, Mora
 from voicevox_engine.synthesis_engine import SynthesisEngine
 
 
-def yukarin_s_mock(length: int, phoneme_list: numpy.ndarray, speaker_id: numpy.ndarray):
-    result = []
-    # mockとしての適当な処理、特に意味はない
-    for i in range(length):
-        result.append(round(float(phoneme_list[i] * 0.0625 + speaker_id), 2))
-    return numpy.array(result)
-
-
-def yukarin_sa_mock(
+def variance_mock(
     length: int,
-    vowel_phoneme_list: numpy.ndarray,
-    consonant_phoneme_list: numpy.ndarray,
-    start_accent_list: numpy.ndarray,
-    end_accent_list: numpy.ndarray,
-    start_accent_phrase_list: numpy.ndarray,
-    end_accent_phrase_list: numpy.ndarray,
+    phonemes: numpy.ndarray,
+    accents: numpy.ndarray,
     speaker_id: numpy.ndarray,
 ):
-    result = []
+    result1 = []
+    result2 = []
     # mockとしての適当な処理、特に意味はない
     for i in range(length):
-        result.append(
-            round(
-                float(
-                    (
-                        vowel_phoneme_list[0][i]
-                        + consonant_phoneme_list[0][i]
-                        + start_accent_list[0][i]
-                        + end_accent_list[0][i]
-                        + start_accent_phrase_list[0][i]
-                        + end_accent_phrase_list[0][i]
-                    )
-                    * 0.0625
-                    + speaker_id
-                ),
-                2,
-            )
-        )
-    return numpy.array(result)[numpy.newaxis]
+        result1.append(float(phonemes[i] * 0.5 + speaker_id))
+        result2.append(float(accents[i] * 0.5 + speaker_id))
+    print(phonemes, accents)
+    print(result1, result2)
+    return numpy.array(result1), numpy.array(result2)
 
 
 def decode_mock(
     length: int,
-    phoneme_size: int,
-    f0: numpy.ndarray,
-    phoneme: numpy.ndarray,
+    phonemes: numpy.ndarray,
+    pitches: numpy.ndarray,
+    durations: numpy.ndarray,
     speaker_id: Union[numpy.ndarray, int],
 ):
     result = []
     # mockとしての適当な処理、特に意味はない
+    int_durations = numpy.round(durations.astype(numpy.float32) * 93.75).astype(
+        numpy.int64
+    )  # 24000 / 256 = 93.75
     for i in range(length):
         # decode forwardはデータサイズがlengthの256倍になるのでとりあえず256回データをresultに入れる
-        for _ in range(256):
-            result.append(
-                float(
-                    f0[i][0] * (numpy.where(phoneme[i] == 1)[0] / phoneme_size)
-                    + speaker_id
-                )
-            )
+        d = int_durations[i]
+        for _ in range(d * 512):
+            result.append(float((phonemes[i] + pitches[i]) * 0.5 + speaker_id))
     return numpy.array(result)
 
 
@@ -77,26 +52,26 @@ def koreha_arimasuka_base_expected():
                 Mora(
                     text="コ",
                     consonant="k",
-                    consonant_length=2.44,
+                    consonant_length=3.0,
                     vowel="o",
-                    vowel_length=2.88,
-                    pitch=4.38,
+                    vowel_length=1.0,
+                    pitch=16.0,
                 ),
                 Mora(
                     text="レ",
                     consonant="r",
-                    consonant_length=3.06,
+                    consonant_length=3.0,
                     vowel="e",
-                    vowel_length=1.88,
-                    pitch=4.0,
+                    vowel_length=3.0,
+                    pitch=8.0,
                 ),
                 Mora(
                     text="ワ",
                     consonant="w",
-                    consonant_length=3.62,
+                    consonant_length=3.0,
                     vowel="a",
-                    vowel_length=1.44,
-                    pitch=4.19,
+                    vowel_length=2.0,
+                    pitch=4.5,
                 ),
             ],
             accent=3,
@@ -110,40 +85,40 @@ def koreha_arimasuka_base_expected():
                     consonant=None,
                     consonant_length=None,
                     vowel="a",
-                    vowel_length=1.44,
-                    pitch=1.44,
+                    vowel_length=1.0,
+                    pitch=4.5,
                 ),
                 Mora(
                     text="リ",
                     consonant="r",
-                    consonant_length=3.06,
+                    consonant_length=3.0,
                     vowel="i",
-                    vowel_length=2.31,
-                    pitch=4.44,
+                    vowel_length=3.0,
+                    pitch=11.5,
                 ),
                 Mora(
                     text="マ",
                     consonant="m",
-                    consonant_length=2.62,
+                    consonant_length=3.0,
                     vowel="a",
-                    vowel_length=1.44,
-                    pitch=3.12,
+                    vowel_length=1.5,
+                    pitch=4.5,
                 ),
                 Mora(
                     text="ス",
                     consonant="s",
-                    consonant_length=3.19,
+                    consonant_length=3.0,
                     vowel="U",
-                    vowel_length=1.38,
+                    vowel_length=3.0,
                     pitch=0.0,
                 ),
                 Mora(
                     text="カ",
                     consonant="k",
-                    consonant_length=2.44,
+                    consonant_length=3.0,
                     vowel="a",
-                    vowel_length=1.44,
-                    pitch=2.94,
+                    vowel_length=2.5,
+                    pitch=4.5,
                 ),
             ],
             accent=3,
@@ -169,8 +144,7 @@ def create_mock_query(accent_phrases):
 
 
 class MockCore:
-    yukarin_s_forward = Mock(side_effect=yukarin_s_mock)
-    yukarin_sa_forward = Mock(side_effect=yukarin_sa_mock)
+    variance_forward = Mock(side_effect=variance_mock)
     decode_forward = Mock(side_effect=decode_mock)
 
     def metas(self):
@@ -258,6 +232,7 @@ class TestSynthesisEngineBase(TestCase):
         )
 
         expected = koreha_arimasuka_base_expected()
+        expected[-1].moras[-1].vowel_length = 2.0
         self.create_synthesis_test_base(
             text="これはありますか",
             expected=expected,
@@ -273,8 +248,8 @@ class TestSynthesisEngineBase(TestCase):
                             consonant=None,
                             consonant_length=None,
                             vowel="N",
-                            vowel_length=1.25,
-                            pitch=1.44,
+                            vowel_length=2.0,
+                            pitch=3.0,
                         )
                     ],
                     accent=1,
@@ -292,6 +267,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = nn_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         expected[-1].moras += [
             Mora(
                 text="ン",
@@ -310,6 +286,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = nn_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         self.create_synthesis_test_base(
             text="ん？",
             expected=expected,
@@ -325,7 +302,7 @@ class TestSynthesisEngineBase(TestCase):
                             consonant=None,
                             consonant_length=None,
                             vowel="cl",
-                            vowel_length=1.69,
+                            vowel_length=2.0,
                             pitch=0.0,
                         )
                     ],
@@ -344,6 +321,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = ltu_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         self.create_synthesis_test_base(
             text="っ？",
             expected=expected,
@@ -352,6 +330,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = ltu_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         self.create_synthesis_test_base(
             text="っ？",
             expected=expected,
@@ -365,10 +344,10 @@ class TestSynthesisEngineBase(TestCase):
                         Mora(
                             text="ス",
                             consonant="s",
-                            consonant_length=3.19,
+                            consonant_length=3.0,
                             vowel="u",
-                            vowel_length=3.5,
-                            pitch=5.94,
+                            vowel_length=2.0,
+                            pitch=21.0,
                         )
                     ],
                     accent=1,
@@ -386,6 +365,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = su_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         expected[-1].moras += [
             Mora(
                 text="ウ",
@@ -393,7 +373,7 @@ class TestSynthesisEngineBase(TestCase):
                 consonant_length=None,
                 vowel="u",
                 vowel_length=0.15,
-                pitch=expected[-1].moras[-1].pitch + 0.3,
+                pitch=6.5,
             )
         ]
         self.create_synthesis_test_base(
@@ -404,6 +384,7 @@ class TestSynthesisEngineBase(TestCase):
 
         expected = su_base_expected()
         expected[-1].is_interrogative = True
+        expected[-1].moras[-1].vowel_length = 2.5
         self.create_synthesis_test_base(
             text="す？",
             expected=expected,
