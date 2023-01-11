@@ -12,7 +12,7 @@ datas = [
     ('presets.yaml', '.'),
     ('default_setting.yml', '.'),
     ('ui_template', 'ui_template'),
-    ('model', 'model'),
+#     ('model', 'model'),
 ]
 datas += collect_data_files('pyopenjtalk')
 
