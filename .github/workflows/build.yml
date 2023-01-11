@@ -95,7 +95,7 @@ jobs:
         id: vars
         shell: bash
         run: |
-          echo "artifact_name=voicevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "artifact_name=sharevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v3
 
@@ -544,10 +544,10 @@ jobs:
         id: vars
         shell: bash
         run: |
-          echo "package_name=voicevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "package_name=sharevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version }}" >> $GITHUB_OUTPUT
           : # this is exactly same as `steps.vars.outputs.artifact_name` in `build-all` job,
           : # but since we cannot get the job outputs of matrix builds correctly, we need to redefine here.
-          echo "artifact_name=voicevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "artifact_name=sharevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v3
 
