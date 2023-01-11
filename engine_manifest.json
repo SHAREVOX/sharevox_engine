@@ -1,6 +1,7 @@
 {
     "manifest_version": "0.13.1",
-    "name": "DUMMY SHAREVOX ENGINE",
+    "name": "DUMMY SHAREVOX Engine",
+    "brand_name": "SHAREVOX",
     "uuid": "8446e858-4181-44e2-ac58-4192c8b48048",
     "version": "999.999.999",
     "url": "https://github.com/SHAREVOX/sharevox_engine",

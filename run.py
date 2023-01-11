@@ -10,7 +10,6 @@ import sys
 import traceback
 import zipfile
 from distutils.version import LooseVersion
-from enum import Enum
 from functools import lru_cache
 from io import TextIOWrapper
 from pathlib import Path
@@ -20,10 +19,10 @@ from typing import Dict, List, Optional
 import requests
 import soundfile
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, Form, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.params import Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError, conint
 from starlette.background import BackgroundTask
 from starlette.responses import FileResponse
@@ -52,6 +51,12 @@ from voicevox_engine.morphing import (
 )
 from voicevox_engine.part_of_speech_data import MAX_PRIORITY, MIN_PRIORITY
 from voicevox_engine.preset import Preset, PresetLoader
+from voicevox_engine.setting import (
+    USER_SETTING_PATH,
+    CorsPolicyMode,
+    Setting,
+    SettingLoader,
+)
 from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engines
 from voicevox_engine.user_dict import (
@@ -70,11 +75,6 @@ from voicevox_engine.utility import (
     engine_root,
     get_save_dir,
 )
-
-
-class CorsPolicyMode(str, Enum):
-    all = "all"
-    localapps = "localapps"
 
 
 def b64encode_str(s):
@@ -109,6 +109,7 @@ def set_output_log_utf8() -> None:
 def generate_app(
     synthesis_engines: Dict[str, SynthesisEngineBase],
     latest_core_version: str,
+    setting_loader: SettingLoader,
     root_dir: Optional[Path] = None,
     cors_policy_mode: CorsPolicyMode = CorsPolicyMode.localapps,
     allow_origin: Optional[List[str]] = None,
@@ -119,7 +120,7 @@ def generate_app(
     default_sampling_rate = synthesis_engines[latest_core_version].default_sampling_rate
 
     app = FastAPI(
-        title="SHAREVOX ENGINE",
+        title="SHAREVOX Engine",
         description="SHAREVOXの音声合成エンジンです。",
         version=__version__,
     )
@@ -176,6 +177,8 @@ def generate_app(
     engine_manifest_loader = EngineManifestLoader(
         root_dir / "engine_manifest.json", root_dir
     )
+
+    setting_ui_template = Jinja2Templates(directory=engine_root() / "ui_template")
 
     # キャッシュを有効化
     # モジュール側でlru_cacheを指定するとキャッシュを制御しにくいため、HTTPサーバ側で指定する
@@ -644,6 +647,14 @@ def generate_app(
                         user_dir / f"speaker_info/{speaker_uuid}/icons/{id}.png"
                     ).read_bytes()
                 )
+                style_portrait_path = (
+                    root_dir / f"speaker_info/{speaker_uuid}/portraits/{id}.png"
+                )
+                style_portrait = (
+                    b64encode_str(style_portrait_path.read_bytes())
+                    if style_portrait_path.exists()
+                    else None
+                )
                 voice_samples = [
                     b64encode_str(
                         (
@@ -656,7 +667,12 @@ def generate_app(
                     for j in range(3)
                 ]
                 style_infos.append(
-                    {"id": id, "icon": icon, "voice_samples": voice_samples}
+                    {
+                        "id": id,
+                        "icon": icon,
+                        "portrait": style_portrait,
+                        "voice_samples": voice_samples,
+                    }
                 )
         except FileNotFoundError:
             import traceback
@@ -702,13 +718,19 @@ def generate_app(
         return ret_data
 
     @app.post("/initialize_speaker", status_code=204, tags=["その他"])
-    def initialize_speaker(speaker: int, core_version: Optional[str] = None):
+    def initialize_speaker(
+        speaker: int,
+        skip_reinit: bool = Query(  # noqa: B008
+            False, description="既に初期化済みの話者の再初期化をスキップするかどうか"
+        ),
+        core_version: Optional[str] = None,
+    ):
         """
         指定されたspeaker_idの話者を初期化します。
         実行しなくても他のAPIは使用できますが、初回実行時に時間がかかることがあります。
         """
         engine = get_engine(core_version)
-        engine.initialize_speaker_synthesis(speaker)
+        engine.initialize_speaker_synthesis(speaker_id=speaker, skip_reinit=skip_reinit)
         return Response(status_code=204)
 
     @app.get("/is_initialized_speaker", response_model=bool, tags=["その他"])
@@ -923,6 +945,51 @@ def generate_app(
             raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
         return Response(status_code=204)
 
+    @app.get("/setting", response_class=HTMLResponse, tags=["設定"])
+    def setting_get(request: Request):
+        settings = setting_loader.load_setting_file()
+
+        cors_policy_mode = settings.cors_policy_mode
+        allow_origin = settings.allow_origin
+
+        if allow_origin is None:
+            allow_origin = ""
+
+        return setting_ui_template.TemplateResponse(
+            "ui.html",
+            {
+                "request": request,
+                "cors_policy_mode": cors_policy_mode,
+                "allow_origin": allow_origin,
+            },
+        )
+
+    @app.post("/setting", response_class=HTMLResponse, tags=["設定"])
+    def setting_post(
+        request: Request,
+        cors_policy_mode: Optional[str] = Form(None),  # noqa: B008
+        allow_origin: Optional[str] = Form(None),  # noqa: B008
+    ):
+        settings = Setting(
+            cors_policy_mode=cors_policy_mode,
+            allow_origin=allow_origin,
+        )
+
+        # 更新した設定へ上書き
+        setting_loader.dump_setting_file(settings)
+
+        if allow_origin is None:
+            allow_origin = ""
+
+        return setting_ui_template.TemplateResponse(
+            "ui.html",
+            {
+                "request": request,
+                "cors_policy_mode": cors_policy_mode,
+                "allow_origin": allow_origin,
+            },
+        )
+
     return app
 
 
@@ -937,6 +1004,8 @@ if __name__ == "__main__":
             "WARNING:  invalid VV_OUTPUT_LOG_UTF8 environment variable value",
             file=sys.stderr,
         )
+
+    default_cors_policy_mode = CorsPolicyMode.localapps
 
     parser = argparse.ArgumentParser(description="SHAREVOX のエンジンです。")
     parser.add_argument(
@@ -1000,7 +1069,7 @@ if __name__ == "__main__":
         "--cors_policy_mode",
         type=CorsPolicyMode,
         choices=list(CorsPolicyMode),
-        default=CorsPolicyMode.localapps,
+        default=None,
         help="allまたはlocalappsを指定。allはすべてを許可します。"
         "localappsはオリジン間リソース共有ポリシーを、app://.とlocalhost関連に限定します。"
         "その他のオリジンはallow_originオプションで追加できます。デフォルトはlocalapps。",
@@ -1008,6 +1077,10 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--allow_origin", nargs="*", help="許可するオリジンを指定します。複数指定する場合は、直後にスペースで区切って追加できます。"
+    )
+
+    parser.add_argument(
+        "--setting_file", type=Path, default=USER_SETTING_PATH, help="設定ファイルを指定できます。"
     )
 
     args = parser.parse_args()
@@ -1036,13 +1109,30 @@ if __name__ == "__main__":
     if args.enable_cancellable_synthesis:
         cancellable_engine = CancellableEngine(args)
 
+    root_dir = args.voicevox_dir if args.voicevox_dir is not None else engine_root()
+
+    setting_loader = SettingLoader(args.setting_file)
+
+    settings = setting_loader.load_setting_file()
+
+    cors_policy_mode = (
+        args.cors_policy_mode
+        if args.cors_policy_mode is not None
+        else settings.cors_policy_mode
+    )
+
+    allow_origin = (
+        args.allow_origin if args.allow_origin is not None else settings.allow_origin
+    )
+
     uvicorn.run(
         generate_app(
             synthesis_engines,
             latest_core_version,
+            setting_loader,
             root_dir=root_dir,
-            cors_policy_mode=args.cors_policy_mode,
-            allow_origin=args.allow_origin,
+            cors_policy_mode=cors_policy_mode,
+            allow_origin=allow_origin,
         ),
         host=args.host,
         port=args.port,

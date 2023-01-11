@@ -267,6 +267,19 @@ curl -s -X GET "localhost:50025/speaker_info?speaker_uuid=7ffcb7ce-00ec-4bdc-82c
 この API は実験的機能であり、エンジン起動時に引数で`--enable_cancellable_synthesis`を指定しないと有効化されません。  
 音声合成に必要なパラメータは`/synthesis`と同様です。
 
+### CORS設定
+
+VOICEVOXではセキュリティ保護のため`localhost`・`127.0.0.1`・`app://`・Originなし以外のOriginからリクエストを受け入れないようになっています。
+そのため、一部のサードパーティアプリからのレスポンスを受け取れない可能性があります。  
+これを回避する方法として、エンジンから設定できるUIを用意しています。
+
+#### 設定方法
+
+1. <http://127.0.0.1:50021/setting> にアクセスします。
+2. 利用するアプリに合わせて設定を変更、追加してください。
+3. 保存ボタンを押して、変更を確定してください。
+4. 設定の適用にはエンジンの再起動が必要です。必要に応じて再起動をしてください。
+
 ## アップデート
 
 エンジンディレクトリ内にあるファイルを全て消去し、新しいものに置き換えてください。
@@ -342,8 +355,8 @@ python run.py --output_log_utf8
 ### CPU スレッド数を指定する
 
 CPU スレッド数が未指定の場合は、論理コア数の半分か物理コア数が使われます。（殆どの CPU で、これは全体の処理能力の半分です）  
-もし IaaS 上で実行していたり、専用サーバーで実行している場合など、  
-SHAREVOX ENGINE が使う処理能力を調節したい場合は、CPU スレッド数を指定することで実現できます。
+もし IaaS 上で実行していたり、専用サーバーで実行している場合など、
+エンジンが使う処理能力を調節したい場合は、CPU スレッド数を指定することで実現できます。
 
 - 実行時引数で指定する
 
@@ -402,9 +415,10 @@ pre-commit install -t pre-push
 pysen run format lint
 ```
 
-## API ドキュメントの更新
+## API ドキュメントの確認
 
-[API ドキュメント](https://sharevox.github.io/sharevox_engine/api/)（実体は`docs/api/index.html`）の内容を更新します。
+[API ドキュメント](https://voicevox.github.io/voicevox_engine/api/)（実体は`docs/api/index.html`）は自動で更新されます。  
+次のコマンドで API ドキュメントを手動で作成することができます。
 
 ```bash
 python make_docs.py
@@ -430,14 +444,23 @@ LIBCORE_PATH="/path/to/libcore" \
 
 ### 更新
 
-pip-tools を用いて依存ライブラリのバージョンを固定しています。
-`requirements*.in`ファイルを修正後、以下のコマンドで更新できます。
+[Poetry](https://python-poetry.org/) を用いて依存ライブラリのバージョンを固定しています。
+以下のコマンドで操作できます:
 
 ```bash
-# pip>=22 の場合 pip-tools がエラーになります
-pip-compile requirements.in  # こちらを更新する場合は下２つも更新する必要があります。
-pip-compile requirements-dev.in
-pip-compile requirements-test.in
+# パッケージを追加する場合
+poetry add `パッケージ名`
+poetry add --group dev `パッケージ名` # 開発依存の追加
+poetry add --group test `パッケージ名` # テスト依存の追加
+
+# パッケージをアップデートする場合
+poetry update `パッケージ名`
+poetry update # 全部更新
+
+# requirements.txtの更新
+poetry export --without-hashes -o requirements.txt # こちらを更新する場合は下２つも更新する必要があります。
+poetry export --without-hashes --with dev -o requirements-dev.txt
+poetry export --without-hashes --with test -o requirements-test.txt
 ```
 
 ### ライセンス
