@@ -41,7 +41,9 @@ def copy_model_and_info(root_dir: Path):
                 installed_libraries[uuid] = True
                 # libraries.jsonが壊れている場合は、フォルダが存在してもコピーが発生するので
                 # dirs_exist_okをTrueにしておく
-                shutil.copytree(root_model_dir / uuid, model_dir / uuid, dirs_exist_ok=True)
+                shutil.copytree(
+                    root_model_dir / uuid, model_dir / uuid, dirs_exist_ok=True
+                )
             else:
                 # モデルの更新はしないがmetasの更新はあり得るので確認する
                 root_metas_path = root_model_dir / uuid / "metas.json"
@@ -55,7 +57,8 @@ def copy_model_and_info(root_dir: Path):
                 # モデルの更新はしないが、モデルが壊れている可能性はあるので、
                 # チェックサムで検証する
                 filename_list = [
-                    os.path.basename(path) for path in glob.glob(str(root_model_dir / uuid / "*.onnx"))
+                    os.path.basename(path)
+                    for path in glob.glob(str(root_model_dir / uuid / "*.onnx"))
                 ]
                 dirname_list = [root_model_dir / uuid, model_dir / uuid]
                 for filename in filename_list:
@@ -63,7 +66,7 @@ def copy_model_and_info(root_dir: Path):
                     for dirname in dirname_list:
                         s256 = sha256()
                         try:
-                            with open(dirname / filename, 'rb') as f:
+                            with open(dirname / filename, "rb") as f:
                                 while True:
                                     chunk = f.read(2048 * s256.block_size)
                                     if len(chunk) == 0:
@@ -74,7 +77,9 @@ def copy_model_and_info(root_dir: Path):
                             pass
                         hash_list.append(s256.hexdigest())
                     if hash_list[0] != hash_list[1]:
-                        shutil.copy2(dirname_list[0] / filename, dirname_list[1] / filename)
+                        shutil.copy2(
+                            dirname_list[0] / filename, dirname_list[1] / filename
+                        )
 
         with open(libraries_json_path, "w") as f:
             json.dump(installed_libraries, f)
