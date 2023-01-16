@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import shutil
+from hashlib import sha256
 from pathlib import Path
 from typing import Dict
 
@@ -27,13 +28,20 @@ def copy_model_and_info(root_dir: Path):
         # モデルディレクトリが存在する場合、libraries.jsonを参照しながらモデルの追加があるか確認する
         with open(root_model_dir / "libraries.json") as f:
             root_libraries: Dict[str, bool] = json.load(f)
-        with open(libraries_json_path) as f:
-            installed_libraries: Dict[str, bool] = json.load(f)
+        # libraries.jsonが破損している可能性があるので、try-catchする
+        installed_libraries: Dict[str, bool]
+        try:
+            with open(libraries_json_path) as f:
+                installed_libraries = json.load(f)
+        except Exception:
+            installed_libraries = {}
         for uuid in root_libraries.keys():
             value = installed_libraries.get(uuid)
             if value is None:
                 installed_libraries[uuid] = True
-                shutil.copytree(root_model_dir / uuid, model_dir / uuid)
+                # libraries.jsonが壊れている場合は、フォルダが存在してもコピーが発生するので
+                # dirs_exist_okをTrueにしておく
+                shutil.copytree(root_model_dir / uuid, model_dir / uuid, dirs_exist_ok=True)
             else:
                 # モデルの更新はしないがmetasの更新はあり得るので確認する
                 root_metas_path = root_model_dir / uuid / "metas.json"
@@ -44,6 +52,30 @@ def copy_model_and_info(root_dir: Path):
                     installed_metas = f.read()
                 if root_metas != installed_metas:
                     shutil.copy2(root_metas_path, installed_metas_path)
+                # モデルの更新はしないが、モデルが壊れている可能性はあるので、
+                # チェックサムで検証する
+                filename_list = [
+                    os.path.basename(path) for path in glob.glob(str(root_model_dir / uuid / "*.onnx"))
+                ]
+                dirname_list = [root_model_dir / uuid, model_dir / uuid]
+                for filename in filename_list:
+                    hash_list = []
+                    for dirname in dirname_list:
+                        s256 = sha256()
+                        try:
+                            with open(dirname / filename, 'rb') as f:
+                                while True:
+                                    chunk = f.read(2048 * s256.block_size)
+                                    if len(chunk) == 0:
+                                        break
+                                    s256.update(chunk)
+                        # ファイルが存在しない場合
+                        except Exception:
+                            pass
+                        hash_list.append(s256.hexdigest())
+                    if hash_list[0] != hash_list[1]:
+                        shutil.copy2(dirname_list[0] / filename, dirname_list[1] / filename)
+
         with open(libraries_json_path, "w") as f:
             json.dump(installed_libraries, f)
 
