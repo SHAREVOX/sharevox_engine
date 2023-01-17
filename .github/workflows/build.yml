@@ -88,7 +88,7 @@ jobs:
             cudnn_url: https://developer.download.nvidia.com/compute/redist/cudnn/v8.4.1/local_installers/11.6/cudnn-linux-x86_64-8.4.1.50_cuda11.6-archive.tar.xz
             target: linux-nvidia
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows') && 'self-hosted' || matrix.os }}
 
     steps:
       - name: declare variables
@@ -515,10 +515,10 @@ jobs:
         if: github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows-')
         shell: bash
         run: |
-          bash build_util/codesign.bash "dist/run/run.exe"
-        env:
-          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+          bash build_util/codesign_sv.bash "dist/run/run.exe"
+        # env:
+        #   CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+        #   CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
