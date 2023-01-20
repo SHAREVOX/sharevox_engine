@@ -113,6 +113,28 @@ class SpeakerStyle(BaseModel):
     id: int = Field(title="スタイルID")
 
 
+class SpeakerSupportPermittedSynthesisMorphing(str, Enum):
+    ALL = "ALL"  # 全て許可
+    SELF_ONLY = "SELF_ONLY"  # 同じ話者内でのみ許可
+    NOTHING = "NOTHING"  # 全て禁止
+
+    @classmethod
+    def _missing_(cls, value: object) -> "SpeakerSupportPermittedSynthesisMorphing":
+        return SpeakerSupportPermittedSynthesisMorphing.ALL
+
+
+class SpeakerSupportedFeatures(BaseModel):
+    """
+    話者の対応機能の情報
+    """
+
+    permitted_synthesis_morphing: Optional[
+        SpeakerSupportPermittedSynthesisMorphing
+    ] = Field(
+        title="モーフィング機能への対応", default=SpeakerSupportPermittedSynthesisMorphing(None)
+    )
+
+
 class Speaker(BaseModel):
     """
     スピーカー情報
@@ -120,6 +142,7 @@ class Speaker(BaseModel):
 
     name: str = Field(title="名前")
     speaker_uuid: str = Field(title="スピーカーのUUID")
+    supported_features: Optional[SpeakerSupportedFeatures] = Field(title="スピーカーの対応機能")
     styles: List[SpeakerStyle] = Field(title="スピーカースタイルの一覧")
     version: str = Field("スピーカーのバージョン")
 
@@ -152,6 +175,12 @@ class ModelConfig(BaseModel):
 
     length_regulator: str = Field(title="利用するregulatorの文字列。normalもしくはgaussian")
     start_id: int = Field(title="model番号のoffset")
+
+
+class SpeakerNotFoundError(LookupError):
+    def __init__(self, speaker: int, *args: object, **kywrds: object) -> None:
+        self.speaker = speaker
+        super().__init__(f"speaker {speaker} is not found.", *args, **kywrds)
 
 
 class DownloadableLibrary(BaseModel):
@@ -208,16 +237,16 @@ class UserDictWord(BaseModel):
     def check_is_katakana(cls, pronunciation):
         if not fullmatch(r"[ァ-ヴー]+", pronunciation):
             raise ValueError("発音は有効なカタカナでなくてはいけません。")
-        sute_gana = ["ァ", "ィ", "ゥ", "ェ", "ォ", "ャ", "ュ", "ョ", "ヮ", "ッ"]
+        sutegana = ["ァ", "ィ", "ゥ", "ェ", "ォ", "ャ", "ュ", "ョ", "ヮ", "ッ"]
         for i in range(len(pronunciation)):
-            if pronunciation[i] in sute_gana:
+            if pronunciation[i] in sutegana:
                 # 「キャット」のように、捨て仮名が連続する可能性が考えられるので、
                 # 「ッ」に関しては「ッ」そのものが連続している場合と、「ッ」の後にほかの捨て仮名が連続する場合のみ無効とする
                 if i < len(pronunciation) - 1 and (
-                    pronunciation[i + 1] in sute_gana[:-1]
+                    pronunciation[i + 1] in sutegana[:-1]
                     or (
-                        pronunciation[i] == sute_gana[-1]
-                        and pronunciation[i + 1] == sute_gana[-1]
+                        pronunciation[i] == sutegana[-1]
+                        and pronunciation[i + 1] == sutegana[-1]
                     )
                 ):
                     raise ValueError("無効な発音です。(捨て仮名の連続)")
