@@ -50,7 +50,7 @@ curl -s \
 
 <!--生成される音声はサンプリングレートが 24000Hz と少し特殊なため、音声プレーヤーによっては再生できない場合があります。-->
 
-`speaker` に指定する値は `/speakers` エンドポイントで得られる `styleId` です。互換性のために `speaker` という名前になっています。
+`speaker` に指定する値は `/speakers` エンドポイントで得られる `style_id` です。互換性のために `speaker` という名前になっています。
 
 ### 読み方を AquesTalk 記法で取得・修正するサンプルコード
 
@@ -313,7 +313,7 @@ Issue 側で取り組み始めたことを伝えるか、最初に Draft プル�
 
 ```bash
 # 開発に必要なライブラリのインストール
-python -m pip install -r requirements-test.txt
+python -m pip install -r requirements-dev.txt -r requirements-test.txt
 
 # とりあえず実行したいだけなら代わりにこちら
 python -m pip install -r requirements.txt
@@ -415,6 +415,19 @@ pre-commit install -t pre-push
 pysen run format lint
 ```
 
+## タイポチェック
+
+[typos](https://github.com/crate-ci/typos) を使ってタイポのチェックを行っています。
+[typos をインストール](https://github.com/crate-ci/typos#install) した後
+
+```bash
+typos
+```
+
+でタイポチェックを行えます。
+もし誤判定やチェックから除外すべきファイルがあれば
+[設定ファイルの説明](https://github.com/crate-ci/typos#false-positives) に従って`_typos.toml`を編集してください。
+
 ## API ドキュメントの確認
 
 [API ドキュメント](https://voicevox.github.io/voicevox_engine/api/)（実体は`docs/api/index.html`）は自動で更新されます。  
@@ -432,7 +445,8 @@ python make_docs.py
 ```bash
 python -m pip install -r requirements-dev.txt
 
-python generate_licenses.py > licenses.json
+OUTPUT_LICENSE_JSON_PATH=licenses.json \
+bash build_util/create_venv_and_generate_licenses.bash
 
 # ビルド自体はLIBCORE_PATH及びLIBONNXRUNTIME_PATHの指定がなくても可能です
 LIBCORE_PATH="/path/to/libcore" \
@@ -458,9 +472,10 @@ poetry update `パッケージ名`
 poetry update # 全部更新
 
 # requirements.txtの更新
-poetry export --without-hashes -o requirements.txt # こちらを更新する場合は下２つも更新する必要があります。
+poetry export --without-hashes -o requirements.txt # こちらを更新する場合は下３つも更新する必要があります。
 poetry export --without-hashes --with dev -o requirements-dev.txt
 poetry export --without-hashes --with test -o requirements-test.txt
+poetry export --without-hashes --with license -o requirements-license.txt
 ```
 
 ### ライセンス
