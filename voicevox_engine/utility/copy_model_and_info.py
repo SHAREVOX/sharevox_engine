@@ -45,20 +45,12 @@ def copy_model_and_info(root_dir: Path):
                     root_model_dir / uuid, model_dir / uuid, dirs_exist_ok=True
                 )
             else:
-                # モデルの更新はしないがmetasの更新はあり得るので確認する
-                root_metas_path = root_model_dir / uuid / "metas.json"
-                installed_metas_path = model_dir / uuid / "metas.json"
-                with open(root_metas_path, encoding="utf-8") as f:
-                    root_metas = f.read()
-                with open(installed_metas_path, encoding="utf-8") as f:
-                    installed_metas = f.read()
-                if root_metas != installed_metas:
-                    shutil.copy2(root_metas_path, installed_metas_path)
-                # モデルの更新はしないが、モデルが壊れている可能性はあるので、
-                # チェックサムで検証する
+                # モデルの更新はしないが、metas.jsonの更新やモデルが壊れている可能性があるので、
+                # チェックサムで検証し、破損・変更があれば上書きする
                 filename_list = [
                     os.path.basename(path)
                     for path in glob.glob(str(root_model_dir / uuid / "*.onnx"))
+                    + glob.glob(str(root_model_dir / uuid / "*.json"))
                 ]
                 dirname_list = [root_model_dir / uuid, model_dir / uuid]
                 for filename in filename_list:
