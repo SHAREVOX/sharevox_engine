@@ -1,41 +1,81 @@
 [
   {
-    "version": "0.14.0",
+    "version": "0.2.0",
     "descriptions": [
-      "コアをRust言語に移行",
-      "セキュリティアップデート",
-      "スタイルごとに異なる立ち絵の提供を可能に",
-      "VVPPファイルの提供",
-      "設定GUIの提供",
-      "プリセットの保存",
-      "モーフィングAPIの仕様変更",
-      "DirectML利用時に適したGPUを自動選択",
-      "開発環境の向上",
-      "バグ修正"
+      "新しい音声合成手法への移行",
+      "VOICEVOX 0.14の追従",
+      "Rust版コアへ移行",
+      "エンジンが起動しないことがある問題の修正",
+      "コードサイニング証明書の付与"
     ],
     "contributors": [
-      "aoirint",
-      "Appletigerv",
-      "haru3me",
-      "Hiroshiba",
-      "ksk001100",
-      "masinc",
-      "misogihagi",
-      "My-MC",
-      "nebocco",
       "PickledChair",
-      "qryxip",
-      "qwerty2501",
-      "sabonerune",
-      "sarisia",
-      "Segu-g",
-      "sevenc-nanashi",
-      "shigobu",
-      "smly",
-      "takana-v",
-      "ts-klassen",
-      "whiteball",
-      "y-chan"
+      "qryxip"
     ]
+  },
+  {
+    "version": "0.1.7",
+    "descriptions": [
+      "異常終了する問題の修正",
+      "デバッグログの削除"
+    ],
+    "contributors": []
+  },
+  {
+    "version": "0.1.6",
+    "descriptions": [
+      "出力音声の長さや各母音・子音の長さが想定と異なっていた問題の修正",
+      "エンジン関連の一時フォルダ・ファイルが残る問題の修正",
+      "Docker版エンジンの提供"
+    ],
+    "contributors": []
+  },
+  {
+    "version": "0.1.5",
+    "descriptions": [
+      "音声ライブラリの上書きインストールができるように変更"
+    ],
+    "contributors": [
+      "task4233"
+    ]
+  },
+  {
+    "version": "0.1.4",
+    "descriptions": [
+      "複数スタイルある音声ライブラリをインストールした際の挙動の修正",
+      "同じキャラを含む音声ライブラリをインストールした際、起動時にエラーが発生するのを修正"
+    ],
+    "contributors": []
+  },
+  {
+    "version": "0.1.3",
+    "descriptions": [
+      "Windowsにおいて、ユーザー名に日本語が含まれる際に起動できない問題を修正"
+    ],
+    "contributors": [
+      "shigobu"
+    ]
+  },
+  {
+    "version": "0.1.2",
+    "descriptions": [
+      "前後無音が適用されない問題の修正"
+    ],
+    "contributors": []
+  },
+  {
+    "version": "0.1.1",
+    "descriptions": [
+      "Linux GPU版が起動できない問題を修正",
+      "「あ・い・う・え・お・を・ん」が調整・出力できない問題を修正"
+    ],
+    "contributors": []
+  },
+  {
+    "version": "0.1.0",
+    "descriptions": [
+      "ファーストリリース"
+    ],
+    "contributors": []
   }
 ]
