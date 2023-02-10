@@ -87,9 +87,9 @@ def copy_model_and_info(root_dir: Path):
         for uuid in [os.path.basename(info) for info in speaker_infos]:
             root_speaker_dir = root_speaker_info_dir / uuid
             speaker_dir = speaker_info_dir / uuid
-            if not speaker_dir.is_dir():
+            if not speaker_dir.is_dir() and root_speaker_dir.is_dir():
                 shutil.copytree(root_speaker_dir, speaker_dir)
-            else:
+            elif speaker_dir.is_dir():
                 root_portrait_path = root_speaker_dir / "portrait.png"
                 portrait_path = speaker_dir / "portrait.png"
                 with open(root_portrait_path, "rb") as f:

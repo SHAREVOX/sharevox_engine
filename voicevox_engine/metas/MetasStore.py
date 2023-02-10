@@ -22,6 +22,7 @@ class MetasStore:
                 **json.loads((folder / "metas.json").read_text(encoding="utf-8"))
             )
             for folder in engine_speakers_path.iterdir()
+            if folder.is_dir()
         }
 
     def speaker_engine_metas(self, speaker_uuid: str) -> EngineSpeaker:

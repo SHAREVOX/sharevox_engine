@@ -185,7 +185,7 @@ def generate_app(
         root_dir / "engine_manifest.json", root_dir
     )
 
-    metas_store = MetasStore(root_dir / "speaker_info")
+    metas_store = MetasStore(get_save_dir() / "speaker_info")
 
     setting_ui_template = Jinja2Templates(directory=engine_root() / "ui_template")
 
