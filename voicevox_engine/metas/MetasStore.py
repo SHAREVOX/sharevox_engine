@@ -19,7 +19,11 @@ class MetasStore:
         self._engine_speakers_path = engine_speakers_path
         self._loaded_metas: Dict[str, EngineSpeaker] = {
             folder.name: EngineSpeaker(
-                **json.loads((folder / "metas.json").read_text(encoding="utf-8"))
+                **json.loads(
+                    (folder / "metas.json").read_text(encoding="utf-8")
+                    if (folder / "metas.json").exists()
+                    else "{}"
+                )
             )
             for folder in engine_speakers_path.iterdir()
             if folder.is_dir()
