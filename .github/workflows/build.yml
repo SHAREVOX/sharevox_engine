@@ -424,15 +424,15 @@ jobs:
           rm download/${{ env.VOICEVOX_CORE_ASSET_NAME }}.zip
 
       # Download SHAREVOX Model
-      - name: Prepare SHAREVOX Model cache
-        uses: actions/cache@v3
-        id: sharevox-model-cache
-        with:
-          key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
-          path: download/model
+      # - name: Prepare SHAREVOX Model cache
+      #   uses: actions/cache@v3
+      #   id: sharevox-model-cache
+      #   with:
+      #     key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
+      #     path: download/model
 
       - name: Download SHAREVOX Model
-        if: steps.sharevox-model-cache.outputs.cache-hit != 'true'
+        # if: steps.sharevox-model-cache.outputs.cache-hit != 'true'
         shell: bash
         env:
           SHAREVOX_MODEL_ASSET_NAME: sharevox_model-${{ env.VOICEVOX_CORE_VERSION }}
