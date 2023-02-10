@@ -425,7 +425,7 @@ jobs:
 
       # Download SHAREVOX Model
       - name: Prepare SHAREVOX Model cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: sharevox-model-cache
         with:
           key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
