@@ -472,7 +472,7 @@ class TestSynthesisEngine(TestCase):
         mean_f0 = []
         for i in range(list_length):
             f0_single = numpy.array(f0_list[f0_index], dtype=numpy.float32) * (
-                2 ** audio_query.pitchScale
+                2**audio_query.pitchScale
             )
             f0.append(f0_single)
             if f0_single > 0:

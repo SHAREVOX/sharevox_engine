@@ -290,17 +290,21 @@ VOICEVOXではセキュリティ保護のため`localhost`・`127.0.0.1`・`app:
 ### CPU
 
 ```bash
-docker pull voicevox/voicevox_engine:cpu-ubuntu20.04-latest
-docker run --rm -it -p '127.0.0.1:50025:50025' voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+docker pull sharevox/sharevox_engine:cpu-ubuntu20.04-latest
+docker run --rm -p '127.0.0.1:50025:50025' sharevox/sharevox_engine:cpu-ubuntu20.04-latest
 ```
 
 ### GPU
 
 ```bash
-docker pull voicevox/voicevox_engine:nvidia-ubuntu20.04-latest
-docker run --rm --gpus all -p '127.0.0.1:50025:50025' voicevox/voicevox_engine:nvidia-ubuntu20.04-latest
+docker pull sharevox/sharevox_engine:nvidia-ubuntu20.04-latest
+docker run --rm --gpus all -p '127.0.0.1:50025:50025' sharevox/sharevox_engine:nvidia-ubuntu20.04-latest
 ```
+
+#### トラブルシューティング
+GPU版を利用する場合、環境によってエラーが発生することがあります。その場合、`--runtime=nvidia`を`docker run`につけて実行すると解決できることがあります。
 -->
+
 ## 貢献者の方へ
 
 Issue を解決するプルリクエストを作成される際は、別の方と同じ Issue に取り組むことを避けるため、
@@ -503,6 +507,10 @@ python -c "import pyopenjtalk; pyopenjtalk.create_user_dict('default.csv','user.
 | :----------------- | :---------------------------------------------------------------------- |
 | DOCKERHUB_USERNAME | Docker Hub ユーザ名                                                     |
 | DOCKERHUB_TOKEN    | [Docker Hub アクセストークン](https://hub.docker.com/settings/security) |
+
+## 事例紹介
+
+**[voicevox-client](https://github.com/tuna2134/voicevox-client) [@tuna2134](https://github.com/tuna2134)** ･･･ VOICEVOX ENGINE のためのPythonラッパー
 
 ## ライセンス
 <!--

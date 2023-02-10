@@ -399,7 +399,7 @@ class SynthesisEngine(SynthesisEngineBase):
         )
         f0 = numpy.array(f0_list, dtype=numpy.float32)
         # 音高(ピッチ)の調節を適用する(2のPitch Scale乗を掛ける)
-        f0 *= 2 ** query.pitchScale
+        f0 *= 2**query.pitchScale
 
         # 有声音素(音高(ピッチ)が0より大きいもの)か否かを抽出する
         voiced = f0 > 0
