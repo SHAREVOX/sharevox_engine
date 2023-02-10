@@ -35,7 +35,9 @@ def copy_model_and_info(root_dir: Path):
                 installed_libraries = json.load(f)
         except Exception:
             installed_libraries = {}
-        for uuid in root_libraries.keys():
+        # インストール済みだが、root_librariesに含まれない非推奨ライブラリの
+        # 更新がある場合もあるので、installed_librariesとのsetを探索する
+        for uuid in set(list(root_libraries.keys()) + list(installed_libraries.keys())):
             value = installed_libraries.get(uuid)
             if value is None:
                 installed_libraries[uuid] = True
