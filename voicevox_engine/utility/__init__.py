@@ -4,6 +4,8 @@ from .connect_base64_waves import (
     decode_base64_waves,
 )
 from .copy_model_and_info import copy_model_and_info
+from .core_version_utility import get_latest_core_version, parse_core_version
+from .mutex_utility import mutex_wrapper
 from .path_utility import delete_file, engine_root, get_save_dir
 
 __all__ = [
@@ -11,7 +13,10 @@ __all__ = [
     "connect_base64_waves",
     "copy_model_and_info",
     "decode_base64_waves",
+    "get_latest_core_version",
+    "parse_core_version",
     "delete_file",
     "engine_root",
     "get_save_dir",
+    "mutex_wrapper",
 ]

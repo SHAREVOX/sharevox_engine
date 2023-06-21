@@ -32,14 +32,17 @@ class EngineManifestLoader:
                     (self.root_dir / manifest["update_infos"]).read_text("utf-8")
                 )
             ],
+            # supported_vvlib_manifest_versionを持たないengine_manifestのために
+            # キーが存在しない場合はNoneを返すgetを使う
+            supported_vvlib_manifest_version=manifest.get(
+                "supported_vvlib_manifest_version"
+            ),
             dependency_licenses=[
                 LicenseInfo(**license_info)
                 for license_info in json.loads(
                     (self.root_dir / manifest["dependency_licenses"]).read_text("utf-8")
                 )
             ],
-            downloadable_libraries_path=manifest["downloadable_libraries_path"],
-            downloadable_libraries_url=manifest["downloadable_libraries_url"],
             supported_features={
                 key: item["value"]
                 for key, item in manifest["supported_features"].items()
