@@ -5,14 +5,8 @@ import shutil
 from pathlib import Path
 from unittest import TestCase
 
-from voicevox_engine.model import (
-    ModelConfig,
-    Speaker,
-    SpeakerInfo,
-    SpeakerStyle,
-    StyleInfo,
-    SVModelInfo,
-)
+from voicevox_engine.metas.Metas import SpeakerStyle, StyleInfo
+from voicevox_engine.model import ModelConfig, Speaker, SpeakerInfo, SVModelInfo
 from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 
 

@@ -22,7 +22,7 @@ EOF
 
 # assert VOICEVOX_CORE_VERSION >= 0.11.0 (ONNX)
 ARG VOICEVOX_CORE_ASSET_PREFIX=sharevox_core-linux-x64-cpu
-ARG VOICEVOX_CORE_VERSION=0.2.0-preview.1
+ARG VOICEVOX_CORE_VERSION=0.2.0
 RUN <<EOF
     set -eux
 
@@ -64,7 +64,7 @@ RUN <<EOF
     rm -rf /var/lib/apt/lists/*
 EOF
 
-ARG ONNXRUNTIME_URL=https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-1.13.1.tgz
+ARG ONNXRUNTIME_URL=https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-linux-x64-1.12.1.tgz
 RUN <<EOF
     set -eux
 
@@ -238,7 +238,7 @@ RUN <<EOF
 EOF
 
 # Download Resource
-ARG VOICEVOX_RESOURCE_VERSION=0.2.0-preview.1
+ARG VOICEVOX_RESOURCE_VERSION=0.2.0
 RUN <<EOF
     set -eux
 

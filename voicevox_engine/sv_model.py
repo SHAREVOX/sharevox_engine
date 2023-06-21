@@ -96,6 +96,11 @@ def register_sv_model(
             with open(speaker_info_dir / "portrait.png", "wb") as f:
                 f.write(base64.b64decode(speaker_info.portrait.encode("utf-8")))
 
+            # TODO: metas.jsonもSV Model API経由で渡せるようにする
+            # - metas => 空のjsonを保存
+            with open(speaker_info_dir / "metas.json", "w") as f:
+                f.write(json.dumps({}))
+
             # - style_infosは、iconとvoiceをbase64デコードして以下の通り保存する
             #   - id => iconとvoice_samplesの保存に使う
             #   - icon => /speaker_info/${uuid}/icons/${id}.png

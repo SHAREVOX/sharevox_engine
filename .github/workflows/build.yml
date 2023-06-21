@@ -21,8 +21,8 @@ on:
 
 env:
   PYTHON_VERSION: "3.8.10"
-  VOICEVOX_RESOURCE_VERSION: "0.2.0-preview.1"
-  VOICEVOX_CORE_VERSION: "0.2.0-preview.1"
+  VOICEVOX_RESOURCE_VERSION: "0.2.0"
+  VOICEVOX_CORE_VERSION: "0.2.0"
 
 jobs:
   config: # 全 jobs で利用する定数の定義. `env` が利用できないコンテキストでも利用できる.
@@ -50,20 +50,20 @@ jobs:
           - os: windows-2019
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-windows-x64-cpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-win-x64-1.13.1.zip
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-win-x64-1.12.1.zip
             target: windows-cpu
           # Windows DirectML
           - os: windows-2019
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-windows-x64-directml
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/Microsoft.ML.OnnxRuntime.DirectML.1.13.1.zip
-            directml_url: https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.10.0
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/Microsoft.ML.OnnxRuntime.DirectML.1.12.1.zip
+            directml_url: https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.9.1
             target: windows-directml
           # Windows NVIDIA GPU
           - os: windows-2019
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-windows-x64-cuda
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-win-x64-gpu-1.13.1.zip
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-win-x64-gpu-1.12.1.zip
             cuda_version: "11.6.2"
             cudnn_url: https://developer.download.nvidia.com/compute/redist/cudnn/v8.4.1/local_installers/11.6/cudnn-windows-x86_64-8.4.1.50_cuda11.6-archive.zip
             zlib_url: http://www.winimage.com/zLibDll/zlib123dllx64.zip
@@ -72,24 +72,24 @@ jobs:
           - os: macos-11
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-osx-x64-cpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-osx-x86_64-1.13.1.tgz
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-osx-x86_64-1.12.1.tgz
             target: macos-x64
           # Linux CPU
           - os: ubuntu-20.04
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-linux-x64-cpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-1.13.1.tgz
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-linux-x64-1.12.1.tgz
             target: linux-cpu
           # Linux NVIDIA GPU
           - os: ubuntu-20.04
             architecture: "x64"
             voicevox_core_asset_prefix: sharevox_core-linux-x64-gpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-gpu-1.13.1.tgz
+            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.12.1/onnxruntime-linux-x64-gpu-1.12.1.tgz
             cuda_version: "11.6.2"
             cudnn_url: https://developer.download.nvidia.com/compute/redist/cudnn/v8.4.1/local_installers/11.6/cudnn-linux-x86_64-8.4.1.50_cuda11.6-archive.tar.xz
             target: linux-nvidia
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows') && 'self-hosted' || matrix.os }}
 
     steps:
       - name: declare variables
@@ -424,15 +424,15 @@ jobs:
           rm download/${{ env.VOICEVOX_CORE_ASSET_NAME }}.zip
 
       # Download SHAREVOX Model
-      - name: Prepare SHAREVOX Model cache
-        uses: actions/cache@v2
-        id: sharevox-model-cache
-        with:
-          key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
-          path: download/model
+      # - name: Prepare SHAREVOX Model cache
+      #   uses: actions/cache@v3
+      #   id: sharevox-model-cache
+      #   with:
+      #     key: ${{ matrix.os }}-sharevox-model-${{ env.VOICEVOX_CORE_VERSION }}
+      #     path: download/model
 
       - name: Download SHAREVOX Model
-        if: steps.sharevox-model-cache.outputs.cache-hit != 'true'
+        # if: steps.sharevox-model-cache.outputs.cache-hit != 'true'
         shell: bash
         env:
           SHAREVOX_MODEL_ASSET_NAME: sharevox_model-${{ env.VOICEVOX_CORE_VERSION }}
@@ -552,10 +552,10 @@ jobs:
         if: github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows-')
         shell: bash
         run: |
-          bash build_util/codesign.bash "dist/run/run.exe"
-        env:
-          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+          bash build_util/codesign_sv.bash "dist/run/run.exe"
+        # env:
+        #   CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+        #   CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

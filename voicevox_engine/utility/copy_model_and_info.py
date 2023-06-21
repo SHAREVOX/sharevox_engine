@@ -35,7 +35,9 @@ def copy_model_and_info(root_dir: Path):
                 installed_libraries = json.load(f)
         except Exception:
             installed_libraries = {}
-        for uuid in root_libraries.keys():
+        # インストール済みだが、root_librariesに含まれない非推奨ライブラリの
+        # 更新がある場合もあるので、installed_librariesとのsetを探索する
+        for uuid in set(list(root_libraries.keys()) + list(installed_libraries.keys())):
             value = installed_libraries.get(uuid)
             if value is None:
                 installed_libraries[uuid] = True
@@ -45,20 +47,12 @@ def copy_model_and_info(root_dir: Path):
                     root_model_dir / uuid, model_dir / uuid, dirs_exist_ok=True
                 )
             else:
-                # モデルの更新はしないがmetasの更新はあり得るので確認する
-                root_metas_path = root_model_dir / uuid / "metas.json"
-                installed_metas_path = model_dir / uuid / "metas.json"
-                with open(root_metas_path, encoding="utf-8") as f:
-                    root_metas = f.read()
-                with open(installed_metas_path, encoding="utf-8") as f:
-                    installed_metas = f.read()
-                if root_metas != installed_metas:
-                    shutil.copy2(root_metas_path, installed_metas_path)
-                # モデルの更新はしないが、モデルが壊れている可能性はあるので、
-                # チェックサムで検証する
+                # モデルの更新はしないが、metas.jsonの更新やモデルが壊れている可能性があるので、
+                # チェックサムで検証し、破損・変更があれば上書きする
                 filename_list = [
                     os.path.basename(path)
                     for path in glob.glob(str(root_model_dir / uuid / "*.onnx"))
+                    + glob.glob(str(root_model_dir / uuid / "*.json"))
                 ]
                 dirname_list = [root_model_dir / uuid, model_dir / uuid]
                 for filename in filename_list:
@@ -93,9 +87,9 @@ def copy_model_and_info(root_dir: Path):
         for uuid in [os.path.basename(info) for info in speaker_infos]:
             root_speaker_dir = root_speaker_info_dir / uuid
             speaker_dir = speaker_info_dir / uuid
-            if not speaker_dir.is_dir():
+            if not speaker_dir.is_dir() and root_speaker_dir.is_dir():
                 shutil.copytree(root_speaker_dir, speaker_dir)
-            else:
+            elif speaker_dir.is_dir():
                 root_portrait_path = root_speaker_dir / "portrait.png"
                 portrait_path = speaker_dir / "portrait.png"
                 with open(root_portrait_path, "rb") as f:
