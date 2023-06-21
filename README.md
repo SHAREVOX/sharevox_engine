@@ -2,7 +2,7 @@
 
 [![build](https://github.com/SHAREVOX/sharevox_engine/actions/workflows/build.yml/badge.svg)](https://github.com/SHAREVOX/sharevox_engine/actions/workflows/build.yml)
 [![releases](https://img.shields.io/github/v/release/SHAREVOX/sharevox_engine)](https://github.com/SHAREVOX/sharevox_engine/releases)
-[![discord](https://discord.sharevox.app)
+[![discord](https://img.shields.io/discord/1016658701727318088?color=5865f2&label=&logo=discord&logoColor=ffffff)](https://discord.sharevox.app)
 
 [![test](https://github.com/SHAREVOX/sharevox_engine/actions/workflows/test.yml/badge.svg)](https://github.com/SHAREVOX/sharevox_engine/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/SHAREVOX/sharevox_engine/badge.svg)](https://coveralls.io/github/SHAREVOX/sharevox_engine)
