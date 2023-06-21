@@ -1,12 +1,15 @@
 import json
+import os
 
 from voicevox_engine.dev.core import mock as core
 from voicevox_engine.dev.synthesis_engine.mock import MockSynthesisEngine
 from voicevox_engine.setting import USER_SETTING_PATH, SettingLoader
+from voicevox_engine.utility.path_utility import get_save_dir
 
 if __name__ == "__main__":
     import run
 
+    os.makedirs(get_save_dir() / "speaker_info", exist_ok=True)
     app = run.generate_app(
         synthesis_engines={"mock": MockSynthesisEngine(speakers=core.metas())},
         latest_core_version="mock",
