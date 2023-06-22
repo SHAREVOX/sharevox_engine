@@ -1104,48 +1104,48 @@ def generate_app(
                 detail=ParseKanaBadRequest(err).dict(),
             )
 
-    @app.get("/sv_models", response_model=List[str], tags=["モデル登録"])
-    def get_sv_models():
-        try:
-            sv_models_list = get_all_sv_models()
-        except Exception:
-            traceback.print_exc()
-            # 読み出しができないのはサーバ側の問題なのでInternal Server Errorにする
-            raise HTTPException(status_code=500, detail="SVモデルの取得に失敗しました。")
-        return Response(
-            content=json.dumps(sv_models_list),
-            media_type="application/json",
-        )
+    # @app.get("/sv_models", response_model=List[str], tags=["モデル登録"])
+    # def get_sv_models():
+    #     try:
+    #         sv_models_list = get_all_sv_models()
+    #     except Exception:
+    #         traceback.print_exc()
+    #         # 読み出しができないのはサーバ側の問題なのでInternal Server Errorにする
+    #         raise HTTPException(status_code=500, detail="SVモデルの取得に失敗しました。")
+    #     return Response(
+    #         content=json.dumps(sv_models_list),
+    #         media_type="application/json",
+    #     )
 
-    @app.post("/sv_model", status_code=204, tags=["モデル登録"])
-    def post_sv_model(sv_model: SVModelInfo):
-        """
-        svモデルを登録します。
+    # @app.post("/sv_model", status_code=204, tags=["モデル登録"])
+    # def post_sv_model(sv_model: SVModelInfo):
+    #     """
+    #     svモデルを登録します。
 
-        Parameters
-        ----------
-        uuid: str
-            モデル固有のUUID
-        variance_model: str
-            variance_model.onnxをbase64エンコードした文字列
-        embedder_model: str
-            embedder_model.onnxをbase64エンコードした文字列
-        decoder_model: str
-            decoder_model.onnxをbase64エンコードした文字列
-        metas: List[Speakers]
-            モデルのメタ情報
-            metas.jsonをlistにしたもの
-        model_config: ModelConfig
-            model_config.jsonをdictにした機械学習に利用するための情報
-        speaker_infos: Dict[str, SpeakerInfo]
-            keyをspeakerInfoのUUIDとした複数のspeaker情報
-        """
-        try:
-            register_sv_model(sv_model)
-        except Exception:
-            traceback.print_exc()
-            raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
-        return Response(status_code=204)
+    #     Parameters
+    #     ----------
+    #     uuid: str
+    #         モデル固有のUUID
+    #     variance_model: str
+    #         variance_model.onnxをbase64エンコードした文字列
+    #     embedder_model: str
+    #         embedder_model.onnxをbase64エンコードした文字列
+    #     decoder_model: str
+    #         decoder_model.onnxをbase64エンコードした文字列
+    #     metas: List[Speakers]
+    #         モデルのメタ情報
+    #         metas.jsonをlistにしたもの
+    #     model_config: ModelConfig
+    #         model_config.jsonをdictにした機械学習に利用するための情報
+    #     speaker_infos: Dict[str, SpeakerInfo]
+    #         keyをspeakerInfoのUUIDとした複数のspeaker情報
+    #     """
+    #     try:
+    #         register_sv_model(sv_model)
+    #     except Exception:
+    #         traceback.print_exc()
+    #         raise HTTPException(status_code=500, detail="モデルの登録に失敗しました")
+    #     return Response(status_code=204)
 
     @app.get("/setting", response_class=HTMLResponse, tags=["設定"])
     def setting_get(request: Request):
