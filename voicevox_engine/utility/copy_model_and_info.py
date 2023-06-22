@@ -11,6 +11,7 @@ from .path_utility import get_save_dir
 user_dir = get_save_dir()
 model_dir = user_dir / "model"
 libraries_json_path = model_dir / "libraries.json"
+library_info_dir = user_dir / "library_info"
 speaker_info_dir = user_dir / "speaker_info"
 
 
@@ -19,6 +20,7 @@ def copy_model_and_info(root_dir: Path):
     engine_rootからuser_dirにモデルデータ・話者情報をコピーする
     """
     root_model_dir = root_dir / "model"
+    root_library_info_dir = root_dir / "library_info"
     root_speaker_info_dir = root_dir / "speaker_info"
 
     # モデルディレクトリが存在しなければすべてコピー
@@ -77,6 +79,49 @@ def copy_model_and_info(root_dir: Path):
 
         with open(libraries_json_path, "w") as f:
             json.dump(installed_libraries, f)
+
+    # ライブラリ情報ディレクトリが存在しなければすべてコピー
+    if not library_info_dir.is_dir():
+        shutil.copytree(root_library_info_dir, library_info_dir)
+    # 過去分のマイグレーション
+    base_library_info = {
+        "manifest_version": "0.15.0",
+        "brand_name": "SHAREVOX",
+        "engine_name": "SHAREVOX Engine",
+        "engine_uuid": "d11b8518-7b23-4c9b-bd04-ecac1ad1e475",
+    }
+    official_v1_library_info = {
+        "name": "SHAREVOX標準音声ライブラリ",
+        "uuid": "3a912f4b-1fb4-4152-a796-947de759ceb5",
+        "version": "0.1.0",
+        "models": ["official"],
+    }
+    official_v1_library_info.update(base_library_info)
+    official_v2_library_info = {
+        "name": "SHAREVOX標準音声ライブラリv2",
+        "uuid": "5ed0089f-d3c4-4425-ac6a-f41cee6b5b38",
+        "version": "0.2.0",
+        "models": ["official-v2-1", "official-v2-2"],
+    }
+    official_v2_library_info.update(base_library_info)
+
+    for dir in glob.glob("**/*.onnx", root_dir=model_dir):
+        if dir.startswith("official/"):
+            library_json_path = (
+                library_info_dir / official_v1_library_info["uuid"] / "library.json"
+            )
+            if not library_json_path.is_file():
+                library_json_path.parent.mkdir(exist_ok=True)
+                with open(library_json_path, "w", encoding="utf-8") as f:
+                    json.dump(official_v1_library_info, f)
+        elif dir.startswith("official-v2-1/"):
+            library_json_path = (
+                library_info_dir / official_v2_library_info["uuid"] / "library.json"
+            )
+            if not library_json_path.is_file():
+                library_json_path.parent.mkdir(exist_ok=True)
+                with open(library_json_path, "w", encoding="utf-8") as f:
+                    json.dump(official_v2_library_info, f)
 
     # 話者情報ディレクトリが存在しなければすべてコピー
     if not speaker_info_dir.is_dir():

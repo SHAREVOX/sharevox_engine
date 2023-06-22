@@ -187,7 +187,7 @@ def generate_app(
         engine_root() / "engine_manifest.json", engine_root()
     ).load_manifest()
     library_manager = LibraryManager(
-        get_save_dir() / "installed_libraries",
+        get_save_dir() / "library_info",
         engine_manifest_data.supported_vvlib_manifest_version,
         engine_manifest_data.brand_name,
         engine_manifest_data.name,
