@@ -44,7 +44,6 @@ from voicevox_engine.model import (
     SpeakerInfo,
     SpeakerNotFoundError,
     SupportedDevicesInfo,
-    SVModelInfo,
     UserDictWord,
     VvlibManifest,
     WordTypes,
@@ -65,7 +64,8 @@ from voicevox_engine.setting import (
     Setting,
     SettingLoader,
 )
-from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
+
+# from voicevox_engine.sv_model import get_all_sv_models, register_sv_model
 from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engines
 from voicevox_engine.user_dict import (
     apply_word,
