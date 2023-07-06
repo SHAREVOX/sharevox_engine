@@ -13,6 +13,7 @@ datas = [
     ('default_setting.yml', '.'),
     ('ui_template', 'ui_template'),
 #     ('model', 'model'),
+    ('library_info', 'library_info'),
 ]
 datas += collect_data_files('pyopenjtalk')
 
