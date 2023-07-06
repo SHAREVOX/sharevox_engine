@@ -25,7 +25,9 @@ def copy_model_and_info(root_dir: Path):
 
     # モデルディレクトリが存在しなければすべてコピー
     if not model_dir.is_dir():
-        shutil.copytree(root_model_dir, model_dir)
+        # 開発環境などで、modelフォルダが存在しない場合はコピーしない
+        if root_model_dir.is_dir():
+            shutil.copytree(root_model_dir, model_dir)
     else:
         # モデルディレクトリが存在する場合、libraries.jsonを参照しながらモデルの追加があるか確認する
         with open(root_model_dir / "libraries.json") as f:
