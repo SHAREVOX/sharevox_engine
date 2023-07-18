@@ -1642,8 +1642,8 @@ test = ["pytest", "scipy"]
 [package.source]
 type = "git"
 url = "https://github.com/VOICEVOX/pyopenjtalk"
-reference = "f4ade29ef9a4f43d8605103cb5bacc29e0b2ccae"
-resolved_reference = "f4ade29ef9a4f43d8605103cb5bacc29e0b2ccae"
+reference = "acd4f02d2af3129382c151590238b9370465e360"
+resolved_reference = "acd4f02d2af3129382c151590238b9370465e360"
 
 [[package]]
 name = "pyrsistent"
