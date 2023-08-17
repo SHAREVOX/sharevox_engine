@@ -251,11 +251,16 @@ class LibraryManager:
             all_speaker_info = (temp_dir_path / "speaker_info").rglob("*")
             for info in all_speaker_info:
                 # temp dirのパスの`speaker_info`以前を置き換える
-                info = Path(str(info).replace(str(temp_dir_path / "speaker_info") + "/", ""))
+                info = Path(
+                    str(info).replace(str(temp_dir_path / "speaker_info") + "/", "")
+                )
                 if (temp_dir_path / "speaker_info" / info).is_dir():
                     os.makedirs(self.speaker_info_dir / info, exist_ok=True)
                 else:
-                    shutil.move(temp_dir_path / "speaker_info" / info, self.speaker_info_dir / info)
+                    shutil.move(
+                        temp_dir_path / "speaker_info" / info,
+                        self.speaker_info_dir / info,
+                    )
             vvlib_manifest.update(
                 {
                     "models": models,
