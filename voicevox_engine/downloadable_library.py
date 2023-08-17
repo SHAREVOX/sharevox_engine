@@ -57,7 +57,8 @@ class LibraryManager:
         standard_libraries = list(
             set(
                 map(
-                    lambda p: str(p).split("/")[-2],
+                    # Windows向けにバックスラッシュの置き換え処理を入れる
+                    lambda p: str(p).replace("\\", "/").split("/")[-2],
                     engine_root().glob("library_info/**/*.json"),
                 )
             )
