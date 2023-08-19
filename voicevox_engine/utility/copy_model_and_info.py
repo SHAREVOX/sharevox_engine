@@ -107,7 +107,8 @@ def copy_model_and_info(root_dir: Path):
     }
     official_v2_library_info.update(base_library_info)
 
-    for dir in glob.glob("**/*.onnx", root_dir=model_dir):
+    for dir in glob.glob("**/variance_model.onnx", root_dir=model_dir):
+        dir = dir.replace("\\", "/")
         if dir.startswith("official/"):
             library_json_path = (
                 library_info_dir / official_v1_library_info["uuid"] / "library.json"
