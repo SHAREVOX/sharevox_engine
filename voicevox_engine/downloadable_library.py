@@ -242,7 +242,7 @@ class LibraryManager:
                     map(
                         # Windows向けにバックスラッシュの置き換え処理を入れる
                         lambda p: str(p).replace("\\", "/").split("/")[-2],
-                        temp_dir_path.glob("**/*.onnx")
+                        temp_dir_path.glob("**/*.onnx"),
                     )
                 )
             )
