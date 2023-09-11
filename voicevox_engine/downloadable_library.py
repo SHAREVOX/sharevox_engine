@@ -172,7 +172,6 @@ class LibraryManager:
         temp_dir = TemporaryDirectory()
         temp_dir_path = Path(temp_dir.name)
         library_dir = self.library_root_dir / library_id
-        library_dir.mkdir(exist_ok=True)
         # with open(library_dir / INFO_FILE, "w", encoding="utf-8") as f:
         #     json.dump(library_info, f, indent=4, ensure_ascii=False)
         if not zipfile.is_zipfile(file):
@@ -241,7 +240,9 @@ class LibraryManager:
             models = list(
                 set(
                     map(
-                        lambda p: str(p).split("/")[-2], temp_dir_path.glob("**/*.onnx")
+                        # Windows向けにバックスラッシュの置き換え処理を入れる
+                        lambda p: str(p).replace("\\", "/").split("/")[-2],
+                        temp_dir_path.glob("**/*.onnx")
                     )
                 )
             )
@@ -267,6 +268,8 @@ class LibraryManager:
                     "models": models,
                 }
             )
+
+            library_dir.mkdir(exist_ok=True)
             with open(
                 library_dir / "library.json",
                 "w",
