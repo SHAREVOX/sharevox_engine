@@ -176,13 +176,13 @@ class LibraryManager:
         #     json.dump(library_info, f, indent=4, ensure_ascii=False)
         if not zipfile.is_zipfile(file):
             raise HTTPException(
-                status_code=422, detail=f"音声ライブラリ {library_id} は不正なファイルです。"
+                status_code=422, detail=f"指定された音声ライブラリ({library_id})は不正なファイルです。"
             )
 
         with zipfile.ZipFile(file) as zf:
             if zf.testzip() is not None:
                 raise HTTPException(
-                    status_code=422, detail=f"音声ライブラリ {library_id} は不正なファイルです。"
+                    status_code=422, detail=f"指定された音声ライブラリ({library_id})は不正なファイルです。"
                 )
 
             # validate manifest version
@@ -194,12 +194,12 @@ class LibraryManager:
             except KeyError:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"指定された音声ライブラリ {library_id} にvvlib_manifest.jsonが存在しません。",
+                    detail=f"指定された音声ライブラリ({library_id})にvvlib_manifest.jsonが存在しません。",
                 )
             except Exception:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"指定された音声ライブラリ {library_id} のvvlib_manifest.jsonは不正です。",
+                    detail=f"指定された音声ライブラリ({library_id})のvvlib_manifest.jsonは不正です。",
                 )
 
             try:
@@ -207,12 +207,14 @@ class LibraryManager:
             except ValidationError:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"指定された音声ライブラリ {library_id} のvvlib_manifest.jsonに不正なデータが含まれています。",
+                    detail=f"指定された音声ライブラリ({library_id})のvvlib_manifest.jsonに不正なデータが含まれています。",
                 )
 
+            library_name = vvlib_manifest["name"]
             if not Version.is_valid(vvlib_manifest["version"]):
                 raise HTTPException(
-                    status_code=422, detail=f"指定された音声ライブラリ {library_id} のversionが不正です。"
+                    status_code=422,
+                    detail=f"指定された音声ライブラリ（{library_name}）のversionが不正です。",
                 )
 
             try:
@@ -222,18 +224,18 @@ class LibraryManager:
             except ValueError:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"指定された音声ライブラリ {library_id} のmanifest_versionが不正です。",
+                    detail=f"指定された音声ライブラリ（{library_name}）のmanifest_versionが不正です。",
                 )
 
             if vvlib_manifest_version > self.supported_vvlib_version:
                 raise HTTPException(
-                    status_code=422, detail=f"指定された音声ライブラリ {library_id} は未対応です。"
+                    status_code=422, detail=f"指定された音声ライブラリ（{library_name}）は未対応です。"
                 )
 
             if vvlib_manifest["engine_uuid"] != self.engine_uuid:
                 raise HTTPException(
                     status_code=422,
-                    detail=f"指定された音声ライブラリ {library_id} は{self.engine_name}向けではありません。",
+                    detail=f"指定された音声ライブラリ（{library_name}）は{self.engine_name}向けではありません。",
                 )
 
             try:
@@ -281,7 +283,9 @@ class LibraryManager:
 
                 # 最後にlibraries.jsonに追記する
                 # 2回ロックをかけるよりも1回のrwロックの方が整合性が保たれて良い
-                with open(self.model_dir / "libraries.json", "r+", encoding="utf-8") as f:
+                with open(
+                    self.model_dir / "libraries.json", "r+", encoding="utf-8"
+                ) as f:
                     libraries_json: dict = json.load(f)
                     for model in models:
                         libraries_json[model] = True
@@ -291,21 +295,23 @@ class LibraryManager:
                 return library_dir
             except Exception as e:
                 # TODO: エラーをキャッチし、それに応じて元の状態を復元するようにする
+                print(e)
                 raise HTTPException(
-                    status_code=500, detail=f"指定された音声ライブラリ {library_id} のインストールに失敗しました。"
+                    status_code=500,
+                    detail=f"指定された音声ライブラリ（{library_name}）のインストールに失敗しました。",
                 )
-
 
     def uninstall_library(self, library_id: str):
         installed_libraries = self.installed_libraries()
         if library_id not in installed_libraries.keys():
             raise HTTPException(
-                status_code=404, detail=f"指定された音声ライブラリ {library_id} はインストールされていません。"
+                status_code=404, detail=f"指定された音声ライブラリ({library_id})はインストールされていません。"
             )
 
+        library_name = installed_libraries[library_id]["name"]
         if not installed_libraries[library_id]["uninstallable"]:
             raise HTTPException(
-                status_code=403, detail=f"指定された音声ライブラリ {library_id} はアンインストールできません。"
+                status_code=403, detail=f"指定された音声ライブラリ（{library_name}）はアンインストールできません。"
             )
 
         try:
@@ -357,5 +363,5 @@ class LibraryManager:
         except Exception as e:
             print(e)
             raise HTTPException(
-                status_code=500, detail=f"指定された音声ライブラリ {library_id} の削除に失敗しました。"
+                status_code=500, detail=f"指定された音声ライブラリ（{library_name}）の削除に失敗しました。"
             )
