@@ -236,58 +236,65 @@ class LibraryManager:
                     detail=f"指定された音声ライブラリ {library_id} は{self.engine_name}向けではありません。",
                 )
 
-            zf.extractall(temp_dir_path)
-            models = list(
-                set(
-                    map(
-                        # Windows向けにバックスラッシュの置き換え処理を入れる
-                        lambda p: str(p).replace("\\", "/").split("/")[-2],
-                        temp_dir_path.glob("**/*.onnx"),
+            try:
+                zf.extractall(temp_dir_path)
+                models = list(
+                    set(
+                        map(
+                            # Windows向けにバックスラッシュの置き換え処理を入れる
+                            lambda p: str(p).replace("\\", "/").split("/")[-2],
+                            temp_dir_path.glob("**/*.onnx"),
+                        )
                     )
                 )
-            )
-            for model in models:
-                if (self.model_dir / model).is_dir():
-                    shutil.rmtree(self.model_dir / model)
-                shutil.move(temp_dir_path / model, self.model_dir)
-            all_speaker_info = (temp_dir_path / "speaker_info").rglob("*")
-            for info in all_speaker_info:
-                # temp dirのパスの`speaker_info`以前を置き換える
-                info = Path(
-                    str(info).replace(str(temp_dir_path / "speaker_info") + "/", "")
-                )
-                if (temp_dir_path / "speaker_info" / info).is_dir():
-                    os.makedirs(self.speaker_info_dir / info, exist_ok=True)
-                else:
-                    shutil.move(
-                        temp_dir_path / "speaker_info" / info,
-                        self.speaker_info_dir / info,
-                    )
-            vvlib_manifest.update(
-                {
-                    "models": models,
-                }
-            )
-
-            library_dir.mkdir(exist_ok=True)
-            with open(
-                library_dir / "library.json",
-                "w",
-                encoding="utf-8",
-            ) as f:
-                json.dump(vvlib_manifest, f, ensure_ascii=False)
-            temp_dir.cleanup()
-
-            # 最後にlibraries.jsonに追記する
-            # 2回ロックをかけるよりも1回のrwロックの方が整合性が保たれて良い
-            with open(self.model_dir / "libraries.json", "r+", encoding="utf-8") as f:
-                libraries_json: dict = json.load(f)
                 for model in models:
-                    libraries_json[model] = True
-                f.seek(0)
-                json.dump(libraries_json, f, ensure_ascii=False)
+                    if (self.model_dir / model).is_dir():
+                        shutil.rmtree(self.model_dir / model)
+                    shutil.move(temp_dir_path / model, self.model_dir)
+                all_speaker_info = (temp_dir_path / "speaker_info").rglob("*")
+                for info in all_speaker_info:
+                    # temp dirのパスの`speaker_info`以前を置き換える
+                    info = Path(
+                        str(info).replace(str(temp_dir_path / "speaker_info") + "/", "")
+                    )
+                    if (temp_dir_path / "speaker_info" / info).is_dir():
+                        os.makedirs(self.speaker_info_dir / info, exist_ok=True)
+                    else:
+                        shutil.move(
+                            temp_dir_path / "speaker_info" / info,
+                            self.speaker_info_dir / info,
+                        )
+                vvlib_manifest.update(
+                    {
+                        "models": models,
+                    }
+                )
 
-        return library_dir
+                library_dir.mkdir(exist_ok=True)
+                with open(
+                    library_dir / "library.json",
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    json.dump(vvlib_manifest, f, ensure_ascii=False)
+                temp_dir.cleanup()
+
+                # 最後にlibraries.jsonに追記する
+                # 2回ロックをかけるよりも1回のrwロックの方が整合性が保たれて良い
+                with open(self.model_dir / "libraries.json", "r+", encoding="utf-8") as f:
+                    libraries_json: dict = json.load(f)
+                    for model in models:
+                        libraries_json[model] = True
+                    f.seek(0)
+                    json.dump(libraries_json, f, ensure_ascii=False)
+
+                return library_dir
+            except Exception as e:
+                # TODO: エラーをキャッチし、それに応じて元の状態を復元するようにする
+                raise HTTPException(
+                    status_code=500, detail=f"指定された音声ライブラリ {library_id} のインストールに失敗しました。"
+                )
+
 
     def uninstall_library(self, library_id: str):
         installed_libraries = self.installed_libraries()
