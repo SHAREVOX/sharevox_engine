@@ -15,8 +15,8 @@ on:
 env:
   IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/sharevox_engine
   PYTHON_VERSION: "3.11.3"
-  VOICEVOX_RESOURCE_VERSION: "0.3.0-preview.1"
-  VOICEVOX_CORE_VERSION: "0.2.0"
+  VOICEVOX_RESOURCE_VERSION: "0.3.0-preview.2"
+  VOICEVOX_CORE_VERSION: "0.2.1"
 
 defaults:
   run:
