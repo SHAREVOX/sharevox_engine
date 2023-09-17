@@ -39,6 +39,7 @@ class TestLibraryManager(TestCase):
         with open("test/vvlib_manifest.json") as f:
             self.vvlib_manifest = json.loads(f.read())
             self.library_uuid = self.vvlib_manifest["uuid"]
+            self.library_name = self.vvlib_manifest["name"]
         with ZipFile(self.library_filename, "w") as zf:
             speaker_infos = glob.glob("speaker_info/**", recursive=True)
             for info in speaker_infos:
@@ -91,7 +92,7 @@ class TestLibraryManager(TestCase):
         # 不正なZIPファイルのテスト
         with self.assertRaises(HTTPException) as e:
             self.library_manger.install_library(self.library_uuid, BytesIO())
-        self.assertEqual(e.exception.detail, f"音声ライブラリ {self.library_uuid} は不正なファイルです。")
+        self.assertEqual(e.exception.detail, f"指定された音声ライブラリ({self.library_uuid})は不正なファイルです。")
 
         # vvlib_manifestの存在確認のテスト
         invalid_vvlib_name = "test/invalid.vvlib"
@@ -100,7 +101,7 @@ class TestLibraryManager(TestCase):
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
             e.exception.detail,
-            f"指定された音声ライブラリ {self.library_uuid} にvvlib_manifest.jsonが存在しません。",
+            f"指定された音声ライブラリ({self.library_uuid})にvvlib_manifest.jsonが存在しません。",
         )
 
         # vvlib_manifestのパースのテスト
@@ -113,7 +114,7 @@ class TestLibraryManager(TestCase):
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
             e.exception.detail,
-            f"指定された音声ライブラリ {self.library_uuid} のvvlib_manifest.jsonは不正です。",
+            f"指定された音声ライブラリ({self.library_uuid})のvvlib_manifest.jsonは不正です。",
         )
 
         # vvlib_manifestのパースのテスト
@@ -126,7 +127,7 @@ class TestLibraryManager(TestCase):
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
             e.exception.detail,
-            f"指定された音声ライブラリ {self.library_uuid} のvvlib_manifest.jsonに不正なデータが含まれています。",
+            f"指定された音声ライブラリ({self.library_uuid})のvvlib_manifest.jsonに不正なデータが含まれています。",
         )
 
         # vvlib_manifestの不正なversionのテスト
@@ -138,7 +139,7 @@ class TestLibraryManager(TestCase):
         with open(invalid_vvlib_name, "br") as f, self.assertRaises(HTTPException) as e:
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
-            e.exception.detail, f"指定された音声ライブラリ {self.library_uuid} のversionが不正です。"
+            e.exception.detail, f"指定された音声ライブラリ（{self.library_name}）のversionが不正です。"
         )
 
         # vvlib_manifestの不正なmanifest_versionのテスト
@@ -151,7 +152,7 @@ class TestLibraryManager(TestCase):
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
             e.exception.detail,
-            f"指定された音声ライブラリ {self.library_uuid} のmanifest_versionが不正です。",
+            f"指定された音声ライブラリ（{self.library_name}）のmanifest_versionが不正です。",
         )
 
         # vvlib_manifestの未対応のmanifest_versionのテスト
@@ -165,7 +166,7 @@ class TestLibraryManager(TestCase):
         with open(invalid_vvlib_name, "br") as f, self.assertRaises(HTTPException) as e:
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
-            e.exception.detail, f"指定された音声ライブラリ {self.library_uuid} は未対応です。"
+            e.exception.detail, f"指定された音声ライブラリ（{self.library_name}）は未対応です。"
         )
 
         # vvlib_manifestのインストール先エンジンの検証のテスト
@@ -180,7 +181,7 @@ class TestLibraryManager(TestCase):
             self.library_manger.install_library(self.library_uuid, f)
         self.assertEqual(
             e.exception.detail,
-            f"指定された音声ライブラリ {self.library_uuid} は{self.engine_name}向けではありません。",
+            f"指定された音声ライブラリ（{self.library_name}）は{self.engine_name}向けではありません。",
         )
 
         # 正しいライブラリをインストールして問題が起きないか
@@ -198,7 +199,7 @@ class TestLibraryManager(TestCase):
         with self.assertRaises(HTTPException) as e:
             self.library_manger.uninstall_library(self.library_uuid)
         self.assertEqual(
-            e.exception.detail, f"指定された音声ライブラリ {self.library_uuid} はインストールされていません。"
+            e.exception.detail, f"指定された音声ライブラリ({self.library_uuid})はインストールされていません。"
         )
 
         self.library_manger.install_library(self.library_uuid, self.library_file)
