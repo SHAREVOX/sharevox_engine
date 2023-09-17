@@ -92,7 +92,9 @@ class TestLibraryManager(TestCase):
         # 不正なZIPファイルのテスト
         with self.assertRaises(HTTPException) as e:
             self.library_manger.install_library(self.library_uuid, BytesIO())
-        self.assertEqual(e.exception.detail, f"指定された音声ライブラリ({self.library_uuid})は不正なファイルです。")
+        self.assertEqual(
+            e.exception.detail, f"指定された音声ライブラリ({self.library_uuid})は不正なファイルです。"
+        )
 
         # vvlib_manifestの存在確認のテスト
         invalid_vvlib_name = "test/invalid.vvlib"

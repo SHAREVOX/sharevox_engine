@@ -159,7 +159,9 @@ def copy_model_and_info(root_dir: Path):
                     json.dump(official_v2_library_info, f)
         elif dir.startswith("tsuina-voi-dra-1st/"):
             library_json_path = (
-                library_info_dir / tsuina_voi_dra_1st_library_info["uuid"] / "library.json"
+                library_info_dir
+                / tsuina_voi_dra_1st_library_info["uuid"]
+                / "library.json"
             )
             if not library_json_path.is_file():
                 library_json_path.parent.mkdir(exist_ok=True)
