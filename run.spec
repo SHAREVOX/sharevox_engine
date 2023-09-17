@@ -12,10 +12,16 @@ datas = [
     ('presets.yaml', '.'),
     ('default_setting.yml', '.'),
     ('ui_template', 'ui_template'),
-#     ('model', 'model'),
     ('library_info', 'library_info'),
 ]
 datas += collect_data_files('pyopenjtalk')
+
+core_model_dir_path = os.environ.get('CORE_MODEL_DIR_PATH')
+if core_model_dir_path:
+    print('CORE_MODEL_DIR_PATH is found:', core_model_dir_path)
+    if not os.path.isdir(core_model_dir_path):
+        raise Exception("CORE_MODEL_DIR_PATH was found, but it is not directory!")
+    datas += [(core_model_dir_path, "model")]
 
 # コアとONNX Runtimeはバイナリであるが、`binaries`に加えると
 # 依存関係のパスがPyInstallerに書き換えらるので、`datas`に加える
@@ -33,13 +39,6 @@ if libonnxruntime_path:
     if not os.path.isfile(libonnxruntime_path):
         raise Exception("LIBCORE_PATH was found, but it is not file!")
     datas += [(libonnxruntime_path, ".")]
-
-model_dir_path = os.environ.get('MODEL_DIR_PATH')
-if model_dir_path:
-    print('MODEL_DIR_PATH is found:', model_dir_path)
-    if not os.path.isdir(model_dir_path):
-        raise Exception("model_dir_path was found, but it is not directory!")
-    datas += [(model_dir_path, "model")]
 
 
 block_cipher = None

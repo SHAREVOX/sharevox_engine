@@ -450,7 +450,7 @@ jobs:
           SHAREVOX_MODEL_ASSET_NAME: sharevox_model-${{ env.VOICEVOX_CORE_VERSION }}
         run: |
           curl -L "https://github.com/SHAREVOX/sharevox_core/releases/download/${{ env.VOICEVOX_CORE_VERSION }}/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip" > download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
-          7z x -o"download" download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
+          7z x -o"download/core" download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
           rm download/${{ env.SHAREVOX_MODEL_ASSET_NAME }}.zip
 
       - name: Generate licenses.json
@@ -480,9 +480,9 @@ jobs:
             LIBONNXRUNTIME_PATH=download/onnxruntime/lib/libonnxruntime.so
           fi
 
+          CORE_MODEL_DIR_PATH="download/core/model" \
           LIBCORE_PATH="$LIBCORE_PATH" \
           LIBONNXRUNTIME_PATH="$LIBONNXRUNTIME_PATH" \
-          MODEL_DIR_PATH="download/model" \
           pyinstaller --noconfirm run.spec
 
       - name: Gather DLL dependencies to dist/run/ (Windows)
