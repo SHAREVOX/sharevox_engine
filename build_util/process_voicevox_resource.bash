@@ -12,6 +12,14 @@ cp -r $DOWNLOAD_RESOURCE_PATH/character_info speaker_info
 python $DOWNLOAD_RESOURCE_PATH/scripts/clean_character_info.py \
     --character_info_dir speaker_info/
 
+rm -r library_info
+cp -r $DOWNLOAD_RESOURCE_PATH/library_info library_info
+
+# ライブラリ情報の前処理をする
+# キャラクター情報の前処理スクリプトを流用
+python $DOWNLOAD_RESOURCE_PATH/scripts/clean_character_info.py \
+    --character_info_dir library_info/
+
 # マニフェスト
 jq -s '.[0] * .[1]' engine_manifest.json $DOWNLOAD_RESOURCE_PATH/engine/engine_manifest.json \
     > engine_manifest.json.tmp

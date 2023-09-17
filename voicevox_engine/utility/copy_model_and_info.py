@@ -85,6 +85,24 @@ def copy_model_and_info(root_dir: Path):
     # ライブラリ情報ディレクトリが存在しなければすべてコピー
     if not library_info_dir.is_dir():
         shutil.copytree(root_library_info_dir, library_info_dir)
+    else:
+        # ライブラリ情報ディレクトリが存在する場合、ライブラリ情報の追加・更新があるか確認する
+        library_infos = glob.glob(str(root_library_info_dir / "**"))
+        for uuid in [os.path.basename(info) for info in library_infos]:
+            root_library_dir = root_library_info_dir / uuid
+            library_dir = library_info_dir / uuid
+            if not library_dir.is_dir() and root_library_dir.is_dir():
+                shutil.copytree(root_library_dir, library_dir)
+            elif library_dir.is_dir():
+                root_json_path = root_library_dir / "library.json"
+                json_path = library_dir / "library.json"
+                with open(root_json_path, encoding="utf-8") as f:
+                    root_json_data = f.read()
+                with open(json_path, encoding="utf-8") as f:
+                    json_data = f.read()
+                if root_json_data != json_data:
+                    shutil.copy2(root_json_path, json_path)
+
     # 過去分のマイグレーション
     base_library_info = {
         "manifest_version": "0.15.0",
@@ -106,6 +124,20 @@ def copy_model_and_info(root_dir: Path):
         "models": ["official-v2-1", "official-v2-2"],
     }
     official_v2_library_info.update(base_library_info)
+    tsuina_voi_dra_1st_library_info = {
+        "name": "ついなちゃんプロジェクトボイドラ一期生音声ライブラリ",
+        "uuid": "e13f4a7c-984f-4da3-9fdd-962412b7927a",
+        "version": "0.1.0",
+        "models": ["tsuina-voi-dra-1st"],
+    }
+    tsuina_voi_dra_1st_library_info.update(base_library_info)
+    lagopus_tan_library_info = {
+        "name": "らごぱすたん音声ライブラリ",
+        "uuid": "c6328c80-f61b-4e01-885d-646ca9243b26",
+        "version": "0.1.0",
+        "models": ["lagopus-tan"],
+    }
+    lagopus_tan_library_info.update(base_library_info)
 
     for dir in glob.glob("**/variance_model.onnx", root_dir=model_dir):
         dir = dir.replace("\\", "/")
@@ -125,6 +157,22 @@ def copy_model_and_info(root_dir: Path):
                 library_json_path.parent.mkdir(exist_ok=True)
                 with open(library_json_path, "w", encoding="utf-8") as f:
                     json.dump(official_v2_library_info, f)
+        elif dir.startswith("tsuina-voi-dra-1st/"):
+            library_json_path = (
+                library_info_dir / tsuina_voi_dra_1st_library_info["uuid"] / "library.json"
+            )
+            if not library_json_path.is_file():
+                library_json_path.parent.mkdir(exist_ok=True)
+                with open(library_json_path, "w", encoding="utf-8") as f:
+                    json.dump(tsuina_voi_dra_1st_library_info, f)
+        elif dir.startswith("lagopus-tan/"):
+            library_json_path = (
+                library_info_dir / lagopus_tan_library_info["uuid"] / "library.json"
+            )
+            if not library_json_path.is_file():
+                library_json_path.parent.mkdir(exist_ok=True)
+                with open(library_json_path, "w", encoding="utf-8") as f:
+                    json.dump(lagopus_tan_library_info, f)
 
     # 話者情報ディレクトリが存在しなければすべてコピー
     if not speaker_info_dir.is_dir():
