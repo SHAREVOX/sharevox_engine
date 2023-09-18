@@ -31,17 +31,25 @@ def test_release_build(dist_dir: Path, skip_run_process: bool) -> None:
     with urlopen(req) as res:
         assert len(res.read()) > 0
 
+    # 話者一覧取得テスト
+    req = Request(base_url + "speakers")
+    with urlopen(req) as res:
+        res_text = res.read().decode("utf-8")
+        assert len(res_text) > 0
+        res_json = json.loads(res_text)
+        speaker = str(res_json[0]["styles"][0]["id"])
+
     # テキスト -> クエリ
     text = "こんにちは、音声合成の世界へようこそ"
     req = Request(
-        base_url + "audio_query?" + urlencode({"speaker": "8", "text": text}),
+        base_url + "audio_query?" + urlencode({"speaker": speaker, "text": text}),
         method="POST",
     )
     with urlopen(req) as res:
         query = json.loads(res.read().decode("utf-8"))
 
     # クエリ -> 音声
-    req = Request(base_url + "synthesis?speaker=8", method="POST")
+    req = Request(base_url + f"synthesis?speaker={speaker}", method="POST")
     req.add_header("Content-Type", "application/json")
     req.data = json.dumps(query).encode("utf-8")
     with urlopen(req) as res:
